@@ -24,7 +24,7 @@ func NewSnapshotFileService(basePath string) SnapshotFileService {
 func (s SnapshotFileService) Create(gameNumber string, data []byte) error {
 	fileName, err := s.makeFileName(gameNumber, data)
 	if err != nil {
-		return ErrSnapshotDataMalformed
+		return err
 	}
 
 	return os.WriteFile(filepath.Join(s.basePath, fileName), data, 0666)
@@ -42,7 +42,7 @@ func (s SnapshotFileService) makeFileName(gameNumber string, data []byte) (strin
 	var gameMetadata FileNameMetadata
 	if err := json.Unmarshal(data, &gameMetadata); err != nil {
 		slog.Error("Error unmarshaling game metadata", "err", err)
-		return "", err
+		return "", ErrSnapshotDataMalformed
 	}
 	md := gameMetadata.Metadata
 	return fmt.Sprintf("%s_%v_%v_%v.json", gameNumber, md.Tick, md.Now, md.PlayerUID), nil
