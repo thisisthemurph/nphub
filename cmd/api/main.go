@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"nphud/internal/handler"
+	"nphud/internal/repository"
 	"nphud/pkg/store"
 )
 
@@ -32,7 +33,8 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Validator = &CustomValidator{validator: validator.New()}
 
-	gameHandler := handler.NewGameHandler(database)
+	gameRepository := repository.NewGameRepository(database)
+	gameHandler := handler.NewGameHandler(gameRepository)
 	e.POST("/game", gameHandler.CreateNewGame)
 
 	e.Logger.Fatal(e.Start(":42069"))

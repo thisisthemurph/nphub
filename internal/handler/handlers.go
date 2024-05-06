@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"nphud/internal/repository"
 	"nphud/pkg/np"
 	"os"
 )
@@ -28,12 +29,12 @@ type JSONError struct {
 }
 
 type GameHandler struct {
-	db *sql.DB
+	repo repository.GameRepository
 }
 
-func NewGameHandler(db *sql.DB) GameHandler {
+func NewGameHandler(repo repository.GameRepository) GameHandler {
 	return GameHandler{
-		db: db,
+		repo: repo,
 	}
 }
 
@@ -53,10 +54,11 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, JSONError{Message: err.Error()})
 	}
 
-	stmt := "INSERT INTO games (number, api_key) VALUES (?, ?)"
-	_, err = h.db.Exec(stmt, req.GameNumber, req.APIKey)
-	if err != nil {
-		return err
+	if err = h.repo.Create(req.GameNumber, req.APIKey); err != nil {
+		if errors.Is(err, repository.ErrGameExists) {
+			return c.JSON(http.StatusConflict, JSONError{Message: err.Error()})
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
 	}
 
 	var gameMetadata GameMetadata
