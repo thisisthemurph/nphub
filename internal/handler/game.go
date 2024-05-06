@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"nphud/internal/repository"
-	"nphud/internal/services"
+	"nphud/internal/service"
 	"nphud/pkg/np"
 )
 
@@ -20,10 +20,10 @@ type JSONError struct {
 
 type GameHandler struct {
 	repo                repository.GameRepository
-	snapshotFileService services.SnapshotFileService
+	snapshotFileService service.SnapshotFileService
 }
 
-func NewGameHandler(repo repository.GameRepository, snapshotFileService services.SnapshotFileService) GameHandler {
+func NewGameHandler(repo repository.GameRepository, snapshotFileService service.SnapshotFileService) GameHandler {
 	return GameHandler{
 		repo:                repo,
 		snapshotFileService: snapshotFileService,

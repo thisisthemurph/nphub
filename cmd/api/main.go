@@ -8,7 +8,7 @@ import (
 	"log"
 	"nphud/internal/handler"
 	"nphud/internal/repository"
-	"nphud/internal/services"
+	"nphud/internal/service"
 	"nphud/pkg/store"
 )
 
@@ -35,7 +35,7 @@ func main() {
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	gameRepository := repository.NewGameRepository(database)
-	snapshotFileService := services.NewSnapshotFileService("snapshots")
+	snapshotFileService := service.NewSnapshotFileService("snapshots")
 	gameHandler := handler.NewGameHandler(gameRepository, snapshotFileService)
 	e.POST("/game", gameHandler.CreateNewGame)
 
