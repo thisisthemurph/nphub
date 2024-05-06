@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"nphud/np"
+	"nphud/pkg/np"
 	"os"
 )
 

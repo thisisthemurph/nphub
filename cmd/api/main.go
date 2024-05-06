@@ -6,8 +6,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"nphud/handler"
-	"nphud/store"
+	"nphud/internal/handler"
+	"nphud/pkg/store"
 )
 
 type CustomValidator struct {
