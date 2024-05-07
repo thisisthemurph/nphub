@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 )
 
 var ErrGameExists = errors.New("game already exists")
@@ -35,7 +34,6 @@ func (gr GameRepository) List() ([]GameRow, error) {
 			return results, err
 		}
 
-		fmt.Printf("%+v\n", game)
 		results = append(results, game)
 	}
 	return results, nil

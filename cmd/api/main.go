@@ -48,6 +48,8 @@ func main() {
 	snapshotRepository := repository.NewSnapshotRepository(database)
 	snapshotFileService := service.NewSnapshotFileService("snapshots")
 	gameHandler := handler.NewGameHandler(gameRepository, snapshotRepository, snapshotFileService)
+
+	e.GET("/game", gameHandler.ListGames)
 	e.POST("/game", gameHandler.CreateNewGame)
 
 	e.Logger.Fatal(e.Start(":42069"))

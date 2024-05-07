@@ -36,6 +36,30 @@ func NewGameHandler(
 	}
 }
 
+type GameResponse struct {
+	Number string `json:"number"`
+	APIKey string `json:"api_key"`
+}
+
+type GameListResponse struct {
+	Count int            `json:"count"`
+	Games []GameResponse `json:"games"`
+}
+
+func (h GameHandler) ListGames(c echo.Context) error {
+	games, err := h.gameRepo.List()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
+	}
+
+	response := GameListResponse{Count: len(games)}
+	for _, g := range games {
+		response.Games = append(response.Games, GameResponse{Number: g.Number, APIKey: g.APIKey})
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
 func (h GameHandler) CreateNewGame(c echo.Context) error {
 	req := new(NewGameRequest)
 	if err := c.Bind(&req); err != nil {
