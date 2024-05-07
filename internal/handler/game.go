@@ -19,13 +19,19 @@ type JSONError struct {
 }
 
 type GameHandler struct {
-	repo                repository.GameRepository
+	gameRepo            repository.GameRepository
+	snapshotRepo        repository.SnapshotRepository
 	snapshotFileService service.SnapshotFileService
 }
 
-func NewGameHandler(repo repository.GameRepository, snapshotFileService service.SnapshotFileService) GameHandler {
+func NewGameHandler(
+	gameRepo repository.GameRepository,
+	snapshotRepo repository.SnapshotRepository,
+	snapshotFileService service.SnapshotFileService,
+) GameHandler {
 	return GameHandler{
-		repo:                repo,
+		gameRepo:            gameRepo,
+		snapshotRepo:        snapshotRepo,
 		snapshotFileService: snapshotFileService,
 	}
 }
@@ -40,20 +46,30 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, JSONError{Message: "Invalid request"})
 	}
 
+	// Create a new game instance and get the current snapshot.
 	game := np.New(req.GameNumber, req.APIKey)
 	snapshotBytes, err := game.GetCurrentSnapshot()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, JSONError{Message: err.Error()})
 	}
 
-	if err = h.repo.Create(req.GameNumber, req.APIKey); err != nil {
+	// Insert the game into the games row.
+	gameRowID, err := h.gameRepo.Create(req.GameNumber, req.APIKey)
+	if err != nil {
 		if errors.Is(err, repository.ErrGameExists) {
 			return c.JSON(http.StatusConflict, JSONError{Message: err.Error()})
 		}
 		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
 	}
 
-	if err = h.snapshotFileService.Create(game.Number, snapshotBytes); err != nil {
+	// Save the snapshot file.
+	snapshotFileName, err := h.snapshotFileService.Create(game.Number, snapshotBytes)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
+	}
+
+	// Insert an instance into the snapshots.
+	if err = h.snapshotRepo.Create(gameRowID, snapshotFileName); err != nil {
 		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
 	}
 

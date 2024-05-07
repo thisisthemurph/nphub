@@ -11,25 +11,30 @@ import (
 
 var ErrSnapshotDataMalformed = errors.New("malformed snapshot data")
 
+// SnapshotFileService is a service for dealing with snapshot files.
 type SnapshotFileService struct {
 	basePath string
 }
 
+// NewSnapshotFileService creates a new SnapshotFileService.
 func NewSnapshotFileService(basePath string) SnapshotFileService {
 	return SnapshotFileService{
 		basePath: basePath,
 	}
 }
 
-func (s SnapshotFileService) Create(gameNumber string, data []byte) error {
+// Create a new snapshot file and return the name of the newly created file.
+func (s SnapshotFileService) Create(gameNumber string, data []byte) (string, error) {
 	fileName, err := s.makeFileName(gameNumber, data)
 	if err != nil {
-		return err
+		return fileName, err
 	}
 
-	return os.WriteFile(filepath.Join(s.basePath, fileName), data, 0666)
+	err = os.WriteFile(filepath.Join(s.basePath, fileName), data, 0666)
+	return fileName, err
 }
 
+// makeFileName creates a file name with details present in the provided bytes JSON data.
 func (s SnapshotFileService) makeFileName(gameNumber string, data []byte) (string, error) {
 	type FileNameMetadata struct {
 		Metadata struct {

@@ -18,6 +18,7 @@ func NewGameRepository(db *sql.DB) GameRepository {
 	}
 }
 
+// List all games in the games table.
 func (gr GameRepository) List() ([]GameRow, error) {
 	results := make([]GameRow, 0)
 
@@ -40,21 +41,28 @@ func (gr GameRepository) List() ([]GameRow, error) {
 	return results, nil
 }
 
-func (gr GameRepository) Create(number, apiKey string) error {
+// Create a new row in the games table, returning the ID of the newly created record.
+func (gr GameRepository) Create(number, apiKey string) (int64, error) {
 	exists, err := gr.Exists(number, apiKey)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if exists {
-		return ErrGameExists
+		return 0, ErrGameExists
 	}
 
-	stmt := "INSERT INTO games (number, api_key) VALUES (?, ?)"
-	_, err = gr.db.Exec(stmt, number, apiKey)
-	return err
+	stmt := "INSERT INTO games (number, api_key) VALUES (?, ?) returning id;"
+	res, err := gr.db.Exec(stmt, number, apiKey)
+	if err != nil {
+		return 0, err
+	}
+
+	lastInsertID, err := res.LastInsertId()
+	return lastInsertID, err
 }
 
+// Exists returns true if a record exists in the games table with the given game number and API key.
 func (gr GameRepository) Exists(number, apiKey string) (bool, error) {
 	stmt := "SELECT count(*) FROM games WHERE number = ? AND api_key = ?;"
 	var count int

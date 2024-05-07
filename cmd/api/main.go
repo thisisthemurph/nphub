@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
@@ -22,6 +23,12 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	app := config.NewAppConfig(os.Getenv)
 	database, err := store.GetOrCreate(app.Database.FullPath)
@@ -38,8 +45,9 @@ func main() {
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	gameRepository := repository.NewGameRepository(database)
+	snapshotRepository := repository.NewSnapshotRepository(database)
 	snapshotFileService := service.NewSnapshotFileService("snapshots")
-	gameHandler := handler.NewGameHandler(gameRepository, snapshotFileService)
+	gameHandler := handler.NewGameHandler(gameRepository, snapshotRepository, snapshotFileService)
 	e.POST("/game", gameHandler.CreateNewGame)
 
 	e.Logger.Fatal(e.Start(":42069"))
