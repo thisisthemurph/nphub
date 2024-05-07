@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"log/slog"
 	"nphud/internal/config"
@@ -26,9 +25,9 @@ func main() {
 	}
 	defer database.Close()
 
-	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath)
 	gameRepo := repository.NewGameRepository(database)
 	snapshotRepo := repository.NewSnapshotRepository(database)
+	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath, gameRepo, snapshotRepo)
 
 	games, err := gameRepo.List()
 	if err != nil {
@@ -37,22 +36,18 @@ func main() {
 
 	// Get a new snapshot for each of the games.
 	for _, g := range games {
-		fmt.Printf("Game ID: %d\n", g.ID)
+		slog.Debug("Background: fetching snapshot", "game", g)
 		game := np.New(g.Number, g.APIKey)
+
 		snapshotBytes, err := game.GetCurrentSnapshot()
 		if err != nil {
 			slog.Error("Error fetching new snapshot", "game", g)
 			continue
 		}
 
-		fileName, err := snapshotFileService.Create(g.Number, snapshotBytes)
+		_, err = snapshotFileService.Create(g.Number, g.APIKey, snapshotBytes)
 		if err != nil {
 			slog.Error("Error creating new snapshot", "game", g)
-			continue
-		}
-
-		if err = snapshotRepo.Create(g.ID, fileName); err != nil {
-			slog.Error("Error inserting snapshot data into database", "game", g)
 			continue
 		}
 	}

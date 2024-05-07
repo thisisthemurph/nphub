@@ -46,9 +46,9 @@ func main() {
 
 	gameRepository := repository.NewGameRepository(database)
 	snapshotRepository := repository.NewSnapshotRepository(database)
-	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath)
-	gameHandler := handler.NewGameHandler(gameRepository, snapshotRepository, snapshotFileService)
+	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath, gameRepository, snapshotRepository)
 
+	gameHandler := handler.NewGameHandler(gameRepository, snapshotRepository, snapshotFileService)
 	e.GET("/game", gameHandler.ListGames)
 	e.POST("/game", gameHandler.CreateNewGame)
 

@@ -78,7 +78,7 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 	}
 
 	// Insert the game into the games row.
-	gameRowID, err := h.gameRepo.Create(req.GameNumber, req.APIKey)
+	_, err = h.gameRepo.Create(req.GameNumber, req.APIKey)
 	if err != nil {
 		if errors.Is(err, repository.ErrGameExists) {
 			return c.JSON(http.StatusConflict, JSONError{Message: err.Error()})
@@ -86,14 +86,9 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
 	}
 
-	// Save the snapshot file.
-	snapshotFileName, err := h.snapshotFileService.Create(game.Number, snapshotBytes)
+	// Save the snapshot file and create a record in the snapshots table.
+	_, err = h.snapshotFileService.Create(req.GameNumber, req.APIKey, snapshotBytes)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
-	}
-
-	// Insert an instance into the snapshots.
-	if err = h.snapshotRepo.Create(gameRowID, snapshotFileName); err != nil {
 		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
 	}
 

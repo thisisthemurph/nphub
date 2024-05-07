@@ -39,6 +39,15 @@ func (gr GameRepository) List() ([]GameRow, error) {
 	return results, nil
 }
 
+func (gr GameRepository) GetByNumberAndApiKey(number string, apiKey string) (*GameRow, error) {
+	result := new(GameRow)
+	stmt := "SELECT id, number, api_key FROM games WHERE number = ? AND api_key = ?;"
+	if err := gr.db.QueryRow(stmt, number, apiKey).Scan(&result.ID, &result.Number, &result.APIKey); err != nil {
+		return result, err
+	}
+	return result, nil
+}
+
 // Create a new row in the games table, returning the ID of the newly created record.
 func (gr GameRepository) Create(number, apiKey string) (int64, error) {
 	exists, err := gr.Exists(number, apiKey)
