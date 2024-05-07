@@ -1,7 +1,8 @@
 package config
 
 type AppConfig struct {
-	Database DatabaseConfig
+	Database         DatabaseConfig
+	SnapshotBasePath string
 }
 
 type DatabaseConfig struct {
@@ -17,5 +18,6 @@ func NewAppConfig(getenv func(string) string) *AppConfig {
 			Path:     getenv("DB_PATH"),
 			FullPath: getenv("DB_PATH") + getenv("DB_NAME"),
 		},
+		SnapshotBasePath: getenv("SNAPSHOT_BASE_PATH"),
 	}
 }

@@ -26,7 +26,7 @@ func main() {
 	}
 	defer database.Close()
 
-	snapshotFileService := service.NewSnapshotFileService("snapshots")
+	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath)
 	gameRepo := repository.NewGameRepository(database)
 	snapshotRepo := repository.NewSnapshotRepository(database)
 
