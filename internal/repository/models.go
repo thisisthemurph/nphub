@@ -1,7 +1,7 @@
 package repository
 
 type GameRow struct {
-	ID     int
+	ID     int64
 	Number string
 	APIKey string
 }
