@@ -1,6 +1,8 @@
 # Project specific
 np.db
 snapshots/*
+.env
+
 !**/.gitkeep
 
 # Binaries for programs and plugins

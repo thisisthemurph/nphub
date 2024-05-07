@@ -6,10 +6,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"nphud/internal/config"
 	"nphud/internal/handler"
 	"nphud/internal/repository"
 	"nphud/internal/service"
 	"nphud/pkg/store"
+	"os"
 )
 
 type CustomValidator struct {
@@ -21,7 +23,8 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 func main() {
-	database, err := store.GetOrCreate()
+	app := config.NewAppConfig(os.Getenv)
+	database, err := store.GetOrCreate(app.Database.FullPath)
 	if err != nil {
 		log.Fatal(err)
 	}
