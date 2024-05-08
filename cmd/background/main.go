@@ -27,7 +27,7 @@ func main() {
 
 	gameRepo := repository.NewGameRepository(database)
 	snapshotRepo := repository.NewSnapshotRepository(database)
-	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath, gameRepo, snapshotRepo)
+	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath, gameRepo, snapshotRepo, database)
 
 	games, err := gameRepo.List()
 	if err != nil {

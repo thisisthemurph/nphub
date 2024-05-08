@@ -5,3 +5,7 @@ type GameRow struct {
 	Number string
 	APIKey string
 }
+
+type SnapshotRow struct {
+	ID int64
+}

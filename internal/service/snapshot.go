@@ -1,10 +1,12 @@
 package service
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"nphud/internal/model"
 	"nphud/internal/repository"
 	"os"
 	"path/filepath"
@@ -17,6 +19,7 @@ type SnapshotFileService struct {
 	basePath     string
 	gameRepo     repository.GameRepository
 	snapshotRepo repository.SnapshotRepository
+	db           *sql.DB
 }
 
 // NewSnapshotFileService creates a new SnapshotFileService.
@@ -24,11 +27,13 @@ func NewSnapshotFileService(
 	basePath string,
 	gameRepo repository.GameRepository,
 	snapshotRepo repository.SnapshotRepository,
+	db *sql.DB,
 ) SnapshotFileService {
 	return SnapshotFileService{
 		basePath:     basePath,
 		gameRepo:     gameRepo,
 		snapshotRepo: snapshotRepo,
+		db:           db,
 	}
 }
 
@@ -54,6 +59,36 @@ func (s SnapshotFileService) Create(gameNumber, apiKey string, data []byte) (str
 	}
 
 	return fileName, err
+}
+
+func (s SnapshotFileService) GetMostRecent(gameNumber, apiKey string) error {
+	stmt := `
+		select s.path
+		from games g
+		join snapshots s on s.game_id = g.id
+		where g.number = ? and g.api_key = ?
+		order by s.id desc
+		limit 1;`
+
+	var fileName string
+	if err := s.db.QueryRow(stmt, gameNumber, apiKey).Scan(&fileName); err != nil {
+		return err
+	}
+
+	filePath := filepath.Join(s.basePath, fileName)
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	var snapshotFileContainer model.SnapshotFile
+	if err := json.Unmarshal(b, &snapshotFileContainer); err != nil {
+		return err
+	}
+
+	fmt.Println(snapshotFileContainer.ScanningData.StartTime)
+	fmt.Println(snapshotFileContainer)
+	return nil
 }
 
 // makeFileName creates a file name with details present in the provided bytes JSON data.

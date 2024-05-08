@@ -94,3 +94,24 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, nil)
 }
+
+func (h GameHandler) GetGame(c echo.Context) error {
+	req := new(NewGameRequest)
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, JSONError{Message: "Invalid JSON"})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, JSONError{Message: "Invalid request"})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, JSONError{Message: "Invalid request"})
+	}
+
+	err := h.snapshotFileService.GetMostRecent(req.GameNumber, req.APIKey)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, JSONError{Message: "Internal Server Error"})
+	}
+	return nil
+}
