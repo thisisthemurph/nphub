@@ -1,5 +1,9 @@
 create table if not exists snapshots (
     id integer primary key,
-    game_id integer references games(id),
-    path text not null
+    game_id integer,
+    path text not null,
+    constraint fk_games
+        foreign key (game_id)
+        references games(id)
+        on delete cascade
 );
