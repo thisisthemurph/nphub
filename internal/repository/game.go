@@ -49,8 +49,8 @@ func (gr GameRepository) GetByNumberAndApiKey(number string, apiKey string) (*Ga
 }
 
 // Create a new row in the games table, returning the ID of the newly created record.
-func (gr GameRepository) Create(number, apiKey string) (int64, error) {
-	exists, err := gr.Exists(number, apiKey)
+func (gr GameRepository) Create(g GameRowCreate) (int64, error) {
+	exists, err := gr.Exists(g.Number, g.APIKey)
 	if err != nil {
 		return 0, err
 	}
@@ -59,8 +59,8 @@ func (gr GameRepository) Create(number, apiKey string) (int64, error) {
 		return 0, ErrGameExists
 	}
 
-	stmt := "INSERT INTO games (number, api_key) VALUES (?, ?) returning id;"
-	res, err := gr.db.Exec(stmt, number, apiKey)
+	stmt := "INSERT INTO games (number, api_key, player_uid, start_time, tick_rate) VALUES (?, ?, ?, ?, ?);"
+	res, err := gr.db.Exec(stmt, g.Number, g.APIKey, g.PlayerUID, g.StartTimeRaw, g.TickRate)
 	if err != nil {
 		return 0, err
 	}

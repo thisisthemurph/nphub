@@ -31,6 +31,8 @@ type ScanningData struct {
 	War               int            `json:"war"`        // Unknown purpose
 	Players           map[int]Player `json:"players"`
 	TurnBasedTimeOut  int            `json:"turn_based_time_out"`
+
+	StartTimeRaw int64
 }
 
 func (sd *ScanningData) UnmarshalJSON(data []byte) error {
@@ -55,6 +57,8 @@ func (sd *ScanningData) UnmarshalJSON(data []byte) error {
 	sd.GameOver = aux.GameOver == 1
 	sd.Admin = aux.Admin == 1
 	sd.TurnBased = aux.TurnBased == 1
+
+	sd.StartTimeRaw = aux.StartTime
 	return nil
 }
 

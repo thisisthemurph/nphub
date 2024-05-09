@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"nphud/internal/model"
 	"nphud/internal/repository"
 	"nphud/internal/service"
 	"nphud/pkg/np"
@@ -77,9 +79,22 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, JSONError{Message: err.Error()})
 	}
 
-	// Insert the game into the games row.
-	_, err = h.gameRepo.Create(req.GameNumber, req.APIKey)
-	if err != nil {
+	// TODO: Get information from the snapshot to store in the games table
+	var snapshot model.SnapshotFile
+	if err = json.Unmarshal(snapshotBytes, &snapshot); err != nil {
+		return c.JSON(http.StatusBadRequest, JSONError{Message: err.Error()})
+	}
+
+	newGameRow := repository.GameRowCreate{
+		Number:       req.GameNumber,
+		APIKey:       req.APIKey,
+		PlayerUID:    snapshot.ScanningData.PlayerUID,
+		StartTimeRaw: snapshot.ScanningData.StartTimeRaw,
+		TickRate:     snapshot.ScanningData.TickRate,
+	}
+
+	// Insert the game into the games table.
+	if _, err = h.gameRepo.Create(newGameRow); err != nil {
 		if errors.Is(err, repository.ErrGameExists) {
 			return c.JSON(http.StatusConflict, JSONError{Message: err.Error()})
 		}
