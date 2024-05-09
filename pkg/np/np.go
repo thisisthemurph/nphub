@@ -11,11 +11,11 @@ type NeptunesPrideGame struct {
 func New(gameNumber, apiKey string) NeptunesPrideGame {
 	return NeptunesPrideGame{
 		Number: gameNumber,
-		api:    NewAPI(gameNumber, apiKey),
+		api:    newAPI(gameNumber, apiKey),
 	}
 }
 
-// GetCurrentSnapshot returns the JSON representation of the current game in bytes.
-func (np NeptunesPrideGame) GetCurrentSnapshot() ([]byte, error) {
+// TakeSnapshot returns the JSON representation of the current game in bytes.
+func (np NeptunesPrideGame) TakeSnapshot() ([]byte, error) {
 	return np.api.GetCurrentSnapshot()
 }

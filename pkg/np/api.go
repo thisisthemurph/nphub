@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	ErrUnexpectedStatusCode = errors.New("Unexpected status code")
+	ErrUnexpectedStatusCode = errors.New("unexpected status code")
 )
 
 type api struct {
@@ -19,7 +19,7 @@ type api struct {
 	key        string
 }
 
-func NewAPI(gameNumber, apiKey string) api {
+func newAPI(gameNumber, apiKey string) api {
 	return api{
 		gameNumber: gameNumber,
 		key:        apiKey,
@@ -59,7 +59,7 @@ func (a api) GetCurrentSnapshot() ([]byte, error) {
 	}
 
 	var errorResponse APIErrorResponse
-	if err := json.Unmarshal(body, &errorResponse); err != nil {
+	if err = json.Unmarshal(body, &errorResponse); err != nil {
 		slog.Error("Error decoding error response:", "err", err)
 		return nil, err
 	} else if errorResponse.ErrorMessage != "" {

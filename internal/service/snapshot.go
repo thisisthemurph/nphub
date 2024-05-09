@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"nphud/internal/model"
 	"nphud/internal/repository"
+	"nphud/pkg/np"
 	"os"
 	"path/filepath"
 )
@@ -81,13 +81,13 @@ func (s SnapshotFileService) GetMostRecent(gameNumber, apiKey string) error {
 		return err
 	}
 
-	var snapshotFileContainer model.SnapshotFile
-	if err := json.Unmarshal(b, &snapshotFileContainer); err != nil {
+	var snapshot np.APIResponse
+	if err = json.Unmarshal(b, &snapshot); err != nil {
 		return err
 	}
 
-	fmt.Println(snapshotFileContainer.ScanningData.StartTime)
-	fmt.Println(snapshotFileContainer)
+	fmt.Println(snapshot.ScanningData.StartTime)
+	fmt.Println(snapshot)
 	return nil
 }
 
@@ -103,7 +103,7 @@ func (s SnapshotFileService) makeFileName(gameNumber string, data []byte) (strin
 
 	var gameMetadata FileNameMetadata
 	if err := json.Unmarshal(data, &gameMetadata); err != nil {
-		slog.Error("Error unmarshaling game metadata", "err", err)
+		slog.Error("Error unmarshalling game metadata", "err", err)
 		return "", ErrSnapshotDataMalformed
 	}
 	md := gameMetadata.Metadata

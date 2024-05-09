@@ -39,7 +39,7 @@ func main() {
 		slog.Debug("Background: fetching snapshot", "game", g)
 		game := np.New(g.Number, g.APIKey)
 
-		snapshotBytes, err := game.GetCurrentSnapshot()
+		snapshotBytes, err := game.TakeSnapshot()
 		if err != nil {
 			slog.Error("Error fetching new snapshot", "game", g)
 			continue

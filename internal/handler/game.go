@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"nphud/internal/model"
 	"nphud/internal/repository"
 	"nphud/internal/service"
 	"nphud/pkg/np"
@@ -74,13 +73,13 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 
 	// Create a new game instance and get the current snapshot.
 	game := np.New(req.GameNumber, req.APIKey)
-	snapshotBytes, err := game.GetCurrentSnapshot()
+	snapshotBytes, err := game.TakeSnapshot()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, JSONError{Message: err.Error()})
 	}
 
 	// TODO: Get information from the snapshot to store in the games table
-	var snapshot model.SnapshotFile
+	var snapshot np.APIResponse
 	if err = json.Unmarshal(snapshotBytes, &snapshot); err != nil {
 		return c.JSON(http.StatusBadRequest, JSONError{Message: err.Error()})
 	}

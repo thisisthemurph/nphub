@@ -11,20 +11,20 @@ type Player struct {
 	Alias           string                  `json:"alias"`
 	AvatarID        int                     `json:"avatar"`
 	HomeStarUID     int                     `json:"huid"`
-	Cash            int                     `json:"cash"` // Only available for the current player
+	Cash            int                     `json:"cash"` // Only available for the current Player
 	Tech            map[string]TechLevel    `json:"tech"`
-	Researching     string                  `json:"researching"`      // Only available for the current player
-	ResearchingNext string                  `json:"researching_next"` // Only available for the current player
+	Researching     string                  `json:"researching"`      // Only available for the current Player
+	ResearchingNext string                  `json:"researching_next"` // Only available for the current Player
 	TotalIndustry   int                     `json:"total_industry"`
 	TotalEconomy    int                     `json:"total_economy"`
 	TotalScience    int                     `json:"total_science"`
 	TotalStars      int                     `json:"total_stars"`
 	TotalFleets     int                     `json:"total_fleets"`
-	TotalStrength   int                     `json:"total_strength"` // Total ships the player has
+	TotalStrength   int                     `json:"total_strength"` // Total ships the Player has
 	War             map[int]PlayerWarStatus `json:"war"`
-	CountdownToWar  map[int]int             `json:"countdown_to_war"` // An object containing all player IDs and the number of ticks until war starts, if a permanent alliance has ended
+	CountdownToWar  map[int]int             `json:"countdown_to_war"` // An object containing all Player IDs and the number of ticks until war starts, if a permanent alliance has ended
 	Ready           bool                    `json:"ready"`
-	Regard          int                     `json:"regard"` // The AI’s opinion of the player. Note that this may be present for non-AI players.
+	Regard          int                     `json:"regard"` // The AI’s opinion of the Player. Note that this may be present for non-AI players.
 	Conceded        bool                    `json:"conceded"`
 	StarsAbandoned  int                     `json:"stars_abandoned"` // Number of stars abandoned this production round (note: can’t be higher than 1, resets to 0 at prod)
 	MissedTurns     int                     `json:"missed_turns"`
