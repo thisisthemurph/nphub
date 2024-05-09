@@ -12,15 +12,15 @@ type ScanningData struct {
 	Productions       int            `json:"productions"`
 	TickFragment      float64        `json:"tick_fragment"` // Percentage of current tick
 	Now               time.Time      `json:"now"`
-	TickRate          int            `json:"tick_rate"` // Number of ticks per minute
-	ProductionRate    int            `json:"production_rate"`
+	TickRate          int            `json:"tick_rate"`          // Number of minutes per tick
+	ProductionRate    int            `json:"production_rate"`    // Number of ticks per production cycle
+	ProductionCounter int            `json:"production_counter"` // Current tick within the production cycle
 	Stars             map[int]Star   `json:"stars"`
 	StarsForVictory   int            `json:"stars_for_victory"`
 	GameOver          bool           `json:"game_over"` // int in original JSON
 	Started           bool           `json:"started"`
 	StartTime         time.Time      `json:"start_time"`
 	TotalStars        int            `json:"total_stars"`
-	ProductionCounter int            `json:"production_counter"`
 	TradeScanned      int            `json:"trade_scanned"`
 	Tick              int            `json:"tick"`
 	TradeCost         int            `json:"trade_cost"`
@@ -33,6 +33,14 @@ type ScanningData struct {
 	TurnBasedTimeOut  int            `json:"turn_based_time_out"`
 
 	StartTimeRaw int64
+}
+
+// GetNextProductionTime returns the time for the next production cycle.
+func (sd *ScanningData) GetNextProductionTime() time.Time {
+	productionCycleMinutes := sd.ProductionRate * sd.TickRate
+	minutesIntoCurrentProductionCycle := sd.ProductionCounter * sd.TickRate
+	minutesUntilNextProductionCycle := productionCycleMinutes - minutesIntoCurrentProductionCycle
+	return time.Now().Add(time.Duration(minutesUntilNextProductionCycle) * time.Minute)
 }
 
 func (sd *ScanningData) UnmarshalJSON(data []byte) error {
