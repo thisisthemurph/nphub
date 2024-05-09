@@ -59,8 +59,17 @@ func (gr GameRepository) Create(g GameRowCreate) (int64, error) {
 		return 0, ErrGameExists
 	}
 
-	stmt := "INSERT INTO games (number, api_key, player_uid, start_time, tick_rate) VALUES (?, ?, ?, ?, ?);"
-	res, err := gr.db.Exec(stmt, g.Number, g.APIKey, g.PlayerUID, g.StartTimeRaw, g.TickRate)
+	stmt := `
+		insert into games (
+			number,
+			api_key,
+			player_uid,
+			start_time,
+			tick_rate,
+			production_rate
+		) VALUES (?, ?, ?, ?, ?, ?);`
+
+	res, err := gr.db.Exec(stmt, g.Number, g.APIKey, g.PlayerUID, g.StartTimeRaw, g.TickRate, g.ProductionRate)
 	if err != nil {
 		return 0, err
 	}

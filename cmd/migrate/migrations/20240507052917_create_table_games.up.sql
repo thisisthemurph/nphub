@@ -4,5 +4,6 @@ create table if not exists games (
     player_uid integer not null,
     api_key text not null,
     start_time integer not null,
-    tick_rate integer not null
+    tick_rate integer not null,
+    production_rate integer not null
 );

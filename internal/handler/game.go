@@ -85,11 +85,12 @@ func (h GameHandler) CreateNewGame(c echo.Context) error {
 	}
 
 	newGameRow := repository.GameRowCreate{
-		Number:       req.GameNumber,
-		APIKey:       req.APIKey,
-		PlayerUID:    snapshot.ScanningData.PlayerUID,
-		StartTimeRaw: snapshot.ScanningData.StartTimeRaw,
-		TickRate:     snapshot.ScanningData.TickRate,
+		Number:         req.GameNumber,
+		APIKey:         req.APIKey,
+		PlayerUID:      snapshot.ScanningData.PlayerUID,
+		StartTimeRaw:   snapshot.ScanningData.StartTimeRaw,
+		TickRate:       snapshot.ScanningData.TickRate,
+		ProductionRate: snapshot.ScanningData.ProductionRate,
 	}
 
 	// Insert the game into the games table.
