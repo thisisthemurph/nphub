@@ -8,7 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"nphud/internal/config"
-	"nphud/internal/handler"
 	"nphud/internal/repository"
 	"nphud/internal/service"
 	"nphud/pkg/store"
@@ -48,11 +47,6 @@ func main() {
 	snapshotRepository := repository.NewSnapshotRepository(database)
 	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath, gameRepository, snapshotRepository, database)
 
-	gameHandler := handler.NewGameHandler(gameRepository, snapshotRepository, snapshotFileService)
-	e.GET("/game", gameHandler.ListGames)
-	e.POST("/game", gameHandler.CreateNewGame)
-
-	e.GET("/snapshot", gameHandler.GetGame)
-
-	e.Logger.Fatal(e.Start(":42069"))
+	makeRoutes(e, gameRepository, snapshotRepository, snapshotFileService)
+	e.Logger.Fatal(e.Start(app.ListenAddress))
 }

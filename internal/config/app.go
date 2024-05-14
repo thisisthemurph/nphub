@@ -3,6 +3,7 @@ package config
 type AppConfig struct {
 	Database         DatabaseConfig
 	SnapshotBasePath string
+	ListenAddress    string
 }
 
 type DatabaseConfig struct {
@@ -19,5 +20,6 @@ func NewAppConfig(getenv func(string) string) *AppConfig {
 			FullPath: getenv("DB_PATH") + getenv("DB_NAME"),
 		},
 		SnapshotBasePath: getenv("SNAPSHOT_BASE_PATH"),
+		ListenAddress:    getenv("LISTEN_ADDRESS"),
 	}
 }
