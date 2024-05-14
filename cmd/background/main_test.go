@@ -29,11 +29,11 @@ func getGamesStub() ([]repository.GameWithSnapshots, error) {
 	return games, nil
 }
 
-func createSnapshotStub(gameNumber, apiKey string, snapshotBytes []byte) (string, error) {
+func createSnapshotStub(_, _ string, _ []byte) (string, error) {
 	return "", nil
 }
 
-func takeSnapshotStub(game np.NeptunesPrideGame) ([]byte, error) {
+func takeSnapshotStub(_ np.NeptunesPrideGame) ([]byte, error) {
 	return make([]byte, 0), nil
 }
 
