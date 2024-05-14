@@ -1,5 +1,7 @@
 package repository
 
+import "database/sql"
+
 type GameRow struct {
 	ID             int64
 	Number         string
@@ -20,6 +22,7 @@ type GameRowCreate struct {
 }
 
 type SnapshotRow struct {
-	ID   int64
-	Path string
+	ID        sql.NullInt64
+	Path      string
+	CreatedAt int64
 }

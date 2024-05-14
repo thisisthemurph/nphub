@@ -67,7 +67,7 @@ func (s SnapshotFileService) GetMostRecent(gameNumber, apiKey string) error {
 		from games g
 		join snapshots s on s.game_id = g.id
 		where g.number = ? and g.api_key = ?
-		order by s.id desc
+		order by s.created_at desc
 		limit 1;`
 
 	var fileName string
@@ -85,9 +85,6 @@ func (s SnapshotFileService) GetMostRecent(gameNumber, apiKey string) error {
 	if err = json.Unmarshal(b, &snapshot); err != nil {
 		return err
 	}
-
-	fmt.Println(snapshot.ScanningData.StartTime)
-	fmt.Println(snapshot)
 	return nil
 }
 
