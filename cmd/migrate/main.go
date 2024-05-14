@@ -8,7 +8,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/joho/godotenv"
 	"log/slog"
-	"nphud/internal/config"
+	"nphud/pkg/config"
 	"nphud/pkg/store"
 	"os"
 )

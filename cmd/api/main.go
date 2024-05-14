@@ -7,9 +7,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"nphud/internal/config"
 	"nphud/internal/repository"
 	"nphud/internal/service"
+	"nphud/pkg/config"
 	"nphud/pkg/store"
 	"os"
 )
