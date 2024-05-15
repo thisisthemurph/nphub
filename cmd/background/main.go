@@ -4,8 +4,9 @@ import (
 	"errors"
 	"github.com/joho/godotenv"
 	"log/slog"
-	"nphud/internal/repository"
-	"nphud/internal/service"
+	bgservice "nphud/internal/background/service"
+	"nphud/internal/background/types"
+	"nphud/internal/shared/service"
 	"nphud/pkg/config"
 	"nphud/pkg/np"
 	"nphud/pkg/store"
@@ -25,11 +26,15 @@ func main() {
 	}
 	defer database.Close()
 
-	gameRepo := repository.NewGameRepository(database)
-	snapshotRepo := repository.NewSnapshotRepository(database)
-	snapshotFileService := service.NewSnapshotFileService(app.SnapshotBasePath, gameRepo, snapshotRepo, database)
+	bgService := bgservice.NewBackgroundService(database)
+	ssFileService := service.NewSnapshotFileService(app.SnapshotBasePath)
 
-	if _, err = run(gameRepo.List, takeSnapshot, snapshotFileService.Create); err != nil {
+	if _, err = run(
+		bgService.ListGames,
+		takeSnapshot,
+		ssFileService.Save,
+		bgService.AddSnapshotToDatabase,
+	); err != nil {
 		slog.Error("Error fetching latest snapshots", "err", err)
 	}
 }
@@ -41,9 +46,10 @@ type runResult struct {
 }
 
 func run(
-	getGames func() ([]repository.GameWithSnapshots, error),
+	getGames func() ([]types.GameWithSnapshots, error),
 	takeSnapshot func(game np.NeptunesPrideGame) ([]byte, error),
-	createSnapshot func(string, string, []byte) (string, error),
+	createSnapshot func(string, []byte) (string, error),
+	updateDatabase func(string, string, string) error,
 ) (runResult, error) {
 	var results runResult
 
@@ -53,11 +59,14 @@ func run(
 	}
 
 	for _, g := range games {
-		if takeSnapshot, err := shouldTakeNewSnapshot(g); err != nil {
+		shouldTakeSnapshot, err := shouldTakeNewSnapshot(g)
+		if err != nil {
 			slog.Error("Cannot determine if snapshot required", "err", err)
 			results.failCount += 1
 			continue
-		} else if !takeSnapshot {
+		}
+
+		if !shouldTakeSnapshot {
 			results.snapshotsSkipped += 1
 			continue
 		}
@@ -71,12 +80,18 @@ func run(
 			continue
 		}
 
-		_, err = createSnapshot(g.Number, g.APIKey, snapshotBytes)
+		snapshotFileName, err := createSnapshot(g.Number, snapshotBytes)
 		if err != nil {
 			slog.Error("Error creating new snapshot", "game", g)
 			results.failCount += 1
 			continue
 		}
+
+		if err = updateDatabase(g.Number, g.APIKey, snapshotFileName); err != nil {
+			slog.Error("Error updating database", "game", g, "err", err)
+			results.failCount += 1
+		}
+
 		results.snapshotsTaken += 1
 	}
 
@@ -90,7 +105,7 @@ func takeSnapshot(game np.NeptunesPrideGame) ([]byte, error) {
 }
 
 // shouldTakeNewSnapshot determines if a snapshot is required for the given game.
-func shouldTakeNewSnapshot(g repository.GameWithSnapshots) (bool, error) {
+func shouldTakeNewSnapshot(g types.GameWithSnapshots) (bool, error) {
 	gameStartTime := time.Unix(0, g.StartTime*int64(time.Millisecond))
 	lastTickTime, err := GetLastTickTime(time.Now(), gameStartTime, g.TickRate)
 	if err != nil {

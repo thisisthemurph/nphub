@@ -1,0 +1,32 @@
+package view
+
+import (
+    "nphud/internal/app/shared/ui"
+)
+
+templ CreateGamePage() {
+    @ui.App() {
+        <section>
+            <h2>Add a new game</h2>
+            <p>Add one of your current games here using the game number and API key.</p>
+
+            @createGameForm()
+        </section>
+    }
+}
+
+templ createGameForm() {
+    <form hx-post="/game" hx-swap="outerHTML">
+        <label>
+            <span>Game number:</span>
+            <input type="text" name="game_number" />
+        </label>
+
+        <label>
+            <span>API key</span>
+            <input type="text" name="api_key" />
+        </label>
+
+        <button type="submit">Create</button>
+    </form>
+}

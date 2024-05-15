@@ -2,16 +2,17 @@ package main
 
 import (
 	"database/sql"
-	"nphud/internal/repository"
+	"nphud/internal/background/types"
+	"nphud/internal/shared/model"
 	"nphud/pkg/np"
 	"testing"
 	"time"
 )
 
-func getGamesStub() ([]repository.GameWithSnapshots, error) {
-	var games []repository.GameWithSnapshots
-	games = append(games, repository.GameWithSnapshots{
-		GameRow: repository.GameRow{
+func getGamesStub() ([]types.GameWithSnapshots, error) {
+	var games []types.GameWithSnapshots
+	games = append(games, types.GameWithSnapshots{
+		GameRow: model.GameRow{
 			ID:             1,
 			Number:         "123",
 			APIKey:         "abc",
@@ -20,7 +21,7 @@ func getGamesStub() ([]repository.GameWithSnapshots, error) {
 			TickRate:       60,
 			ProductionRate: 24,
 		},
-		Snapshots: []repository.SnapshotRow{{
+		Snapshots: []model.SnapshotRow{{
 			ID:        sql.NullInt64{},
 			Path:      "/snapshots/file.json",
 			CreatedAt: time.Now().Add(-(time.Duration(24*6) * time.Hour)).UnixMilli(),
@@ -29,7 +30,7 @@ func getGamesStub() ([]repository.GameWithSnapshots, error) {
 	return games, nil
 }
 
-func createSnapshotStub(_, _ string, _ []byte) (string, error) {
+func createSnapshotStub(_ string, _ []byte) (string, error) {
 	return "", nil
 }
 
@@ -37,8 +38,12 @@ func takeSnapshotStub(_ np.NeptunesPrideGame) ([]byte, error) {
 	return make([]byte, 0), nil
 }
 
+func updateDatabaseStub(_, _, _ string) error {
+	return nil
+}
+
 func TestRun(t *testing.T) {
-	results, err := run(getGamesStub, takeSnapshotStub, createSnapshotStub)
+	results, err := run(getGamesStub, takeSnapshotStub, createSnapshotStub, updateDatabaseStub)
 	if err != nil {
 		t.Error(err)
 	}
@@ -143,8 +148,8 @@ func TestGetNextTickTime(t *testing.T) {
 }
 
 func TestShouldTakeNewSnapshot(t *testing.T) {
-	game := repository.GameWithSnapshots{
-		GameRow: repository.GameRow{
+	game := types.GameWithSnapshots{
+		GameRow: model.GameRow{
 			ID:             1,
 			Number:         "123",
 			APIKey:         "abc",
@@ -153,7 +158,7 @@ func TestShouldTakeNewSnapshot(t *testing.T) {
 			TickRate:       60,
 			ProductionRate: 24,
 		},
-		Snapshots: []repository.SnapshotRow{
+		Snapshots: []model.SnapshotRow{
 			{
 				ID:        sql.NullInt64{},
 				Path:      "",

@@ -1,0 +1,14 @@
+package view
+
+import (
+    "nphud/internal/app/shared/ui"
+    "nphud/internal/app/feature/manage_game/model"
+)
+
+templ ManageGamePage(game model.Game) {
+    @ui.App() {
+        <section>
+            <h2>Game: {game.Number}</h2>
+        </section>
+    }
+}
