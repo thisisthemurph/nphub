@@ -8,6 +8,7 @@ import (
 	"nphud/internal/shared/service"
 	"nphud/pkg/np"
 	"nphud/pkg/np/model"
+	"nphud/pkg/util"
 	"time"
 )
 
@@ -77,22 +78,30 @@ func (c *CreateGameCommandHandler) insertNewGameInDatabase(ctx context.Context, 
 
 	stmt := `
 		insert into games (
+			name,
 			number,
 			api_key,
 			player_uid,
 			start_time,
 			tick_rate,
-			production_rate
-		) VALUES (?, ?, ?, ?, ?, ?);`
+			production_rate,
+			started,
+			paused,
+			game_over
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
 	res, err := tx.Exec(
 		stmt,
+		scanning.Name,
 		gameNumber,
 		apiKey,
 		scanning.PlayerUID,
 		scanning.StartTimeRaw,
 		scanning.TickRate,
 		scanning.ProductionRate,
+		util.BoolToInt(scanning.Started),
+		util.BoolToInt(scanning.Paused),
+		util.BoolToInt(scanning.GameOver),
 	)
 
 	if err != nil {
@@ -100,6 +109,9 @@ func (c *CreateGameCommandHandler) insertNewGameInDatabase(ctx context.Context, 
 	}
 
 	gameRowId, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
 
 	stmt = "insert into snapshots (game_id, path, created_at) values (?, ?, ?);"
 	if _, err = tx.Exec(stmt, gameRowId, snapshotFileName, time.Now().UnixMilli()); err != nil {
