@@ -1,32 +1,37 @@
 package view
 
 import (
-    "nphud/internal/app/shared/ui"
+	"nphud/internal/app/shared/ui"
 )
 
 templ CreateGamePage() {
-    @ui.App() {
-        <section>
-            <h2>Add a new game</h2>
-            <p>Add one of your current games here using the game number and API key.</p>
-
-            @createGameForm()
-        </section>
-    }
+	@ui.App() {
+		@ui.Container() {
+			<section class="flex flex-col gap-4 justify-center items-center">
+				<div class="prose border border-white p-4 rounded-lg shadow-xl max-w-96">
+					<h2>Add a new game</h2>
+					<p class="">Add one of your current games here using the game number and API key.</p>
+					@createGameForm()
+				</div>
+			</section>
+		}
+	}
 }
 
 templ createGameForm() {
-    <form hx-post="/game" hx-swap="outerHTML">
-        <label>
-            <span>Game number:</span>
-            <input type="text" name="game_number" />
-        </label>
-
-        <label>
-            <span>API key</span>
-            <input type="text" name="api_key" />
-        </label>
-
-        <button type="submit">Create</button>
-    </form>
+	<form hx-post="/game" hx-swap="outerHTML" class="w-full flex flex-col gap-2">
+		<label class="form-control w-full">
+			<div class="label">
+				<span class="label-text">Game number</span>
+			</div>
+			<input type="text" name="game_number" placeholder="The game's number" class="input input-bordered w-full"/>
+		</label>
+		<label class="form-control w-full">
+			<div class="label">
+				<span class="label-text">API key</span>
+			</div>
+			<input type="text" name="api_key" placeholder="Your generated API key" class="input input-bordered w-full"/>
+		</label>
+		<button type="submit" class="mt-4 btn btn-primary">Create</button>
+	</form>
 }
