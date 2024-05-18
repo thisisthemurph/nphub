@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -29,6 +30,13 @@ type Player struct {
 	StarsAbandoned  int                     `json:"stars_abandoned"` // Number of stars abandoned this production round (note: can’t be higher than 1, resets to 0 at prod)
 	MissedTurns     int                     `json:"missed_turns"`
 	KarmaToGive     int                     `json:"karma_to_give"`
+}
+
+func (p *Player) Name() string {
+	if p.AI {
+		return fmt.Sprintf("%s (AI)", p.Alias)
+	}
+	return p.Alias
 }
 
 func (p *Player) UnmarshalJSON(data []byte) error {

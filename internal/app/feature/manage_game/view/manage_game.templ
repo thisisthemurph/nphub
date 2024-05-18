@@ -12,12 +12,18 @@ type ManageGameViewBag struct {
 	LatestScanningData npmodel.ScanningData
 }
 
+func GetGameURL(number string) templ.SafeURL {
+	url := fmt.Sprintf("https://np.ironhelmet.com/game/%s", number)
+	return templ.URL(url)
+}
+
 templ ManageGamePage(game ManageGameViewBag) {
 	@ui.App() {
 		<section>
-			<h2>Game: { game.GameName }</h2>
+			<h2><a href={ GetGameURL(game.GameNumber) } target="_blank">{ game.GameName }</a></h2>
 			<p>Number: { game.GameNumber }</p>
 			<p>Tick rate: { fmt.Sprint(game.LatestScanningData.TickRate) }</p>
 		</section>
+		@Leaderboard(game.LatestScanningData.Players)
 	}
 }

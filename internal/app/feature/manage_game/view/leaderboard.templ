@@ -1,0 +1,29 @@
+package view
+
+import (
+	"fmt"
+	npmodel "nphud/pkg/np/model"
+)
+
+func GetAvatarImageURI(avatarID int) string {
+	return fmt.Sprintf("https://np.ironhelmet.com/images/avatars/160/%d.jpg", avatarID)
+}
+
+templ Leaderboard(players npmodel.PlayerList) {
+	<section class="max-w-96">
+		<h2>Leaderboard</h2>
+		for _, player := range players.Sorted() {
+			<div class="flex justify-start gap-4">
+				<img
+					class="max-w-12"
+					src={ GetAvatarImageURI(player.AvatarID) }
+					alt="avatar"
+				/>
+				<div class="w-full flex justify-between items-center">
+					<p>{ player.Name() }</p>
+					<p>{ fmt.Sprintf("%d Stars", player.TotalStars) }</p>
+				</div>
+			</div>
+		}
+	</section>
+}

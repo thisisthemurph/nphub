@@ -6,31 +6,31 @@ import (
 )
 
 type ScanningData struct {
-	Fleets            map[int]Fleet  `json:"fleets"`
-	FleetSpeed        float64        `json:"fleet_speed"`
-	Paused            bool           `json:"paused"`
-	Productions       int            `json:"productions"`
-	TickFragment      float64        `json:"tick_fragment"` // Percentage of current tick
-	Now               time.Time      `json:"now"`
-	TickRate          int            `json:"tick_rate"`          // Number of minutes per tick
-	ProductionRate    int            `json:"production_rate"`    // Number of ticks per production cycle
-	ProductionCounter int            `json:"production_counter"` // Current tick within the production cycle
-	Stars             map[int]Star   `json:"stars"`
-	StarsForVictory   int            `json:"stars_for_victory"`
-	GameOver          bool           `json:"game_over"` // int in original JSON
-	Started           bool           `json:"started"`
-	StartTime         time.Time      `json:"start_time"`
-	TotalStars        int            `json:"total_stars"`
-	TradeScanned      int            `json:"trade_scanned"`
-	Tick              int            `json:"tick"`
-	TradeCost         int            `json:"trade_cost"`
-	Name              string         `json:"name"`
-	PlayerUID         int            `json:"player_uid"`
-	Admin             bool           `json:"admin"`      // int in original JSON
-	TurnBased         bool           `json:"turn_based"` // int in original JSON
-	War               int            `json:"war"`        // Unknown purpose
-	Players           map[int]Player `json:"players"`
-	TurnBasedTimeOut  int            `json:"turn_based_time_out"`
+	Fleets            map[int]Fleet `json:"fleets"`
+	FleetSpeed        float64       `json:"fleet_speed"`
+	Paused            bool          `json:"paused"`
+	Productions       int           `json:"productions"`
+	TickFragment      float64       `json:"tick_fragment"` // Percentage of current tick
+	Now               time.Time     `json:"now"`
+	TickRate          int           `json:"tick_rate"`          // Number of minutes per tick
+	ProductionRate    int           `json:"production_rate"`    // Number of ticks per production cycle
+	ProductionCounter int           `json:"production_counter"` // Current tick within the production cycle
+	Stars             map[int]Star  `json:"stars"`
+	StarsForVictory   int           `json:"stars_for_victory"`
+	GameOver          bool          `json:"game_over"` // int in original JSON
+	Started           bool          `json:"started"`
+	StartTime         time.Time     `json:"start_time"`
+	TotalStars        int           `json:"total_stars"`
+	TradeScanned      int           `json:"trade_scanned"`
+	Tick              int           `json:"tick"`
+	TradeCost         int           `json:"trade_cost"`
+	Name              string        `json:"name"`
+	PlayerUID         int           `json:"player_uid"`
+	Admin             bool          `json:"admin"`      // int in original JSON
+	TurnBased         bool          `json:"turn_based"` // int in original JSON
+	War               int           `json:"war"`        // Unknown purpose
+	Players           PlayerList    `json:"players"`
+	TurnBasedTimeOut  int           `json:"turn_based_time_out"`
 
 	StartTimeRaw int64
 }
