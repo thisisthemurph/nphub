@@ -44,6 +44,11 @@ func (sd *ScanningData) GetNextProductionTime() time.Time {
 	return time.Now().Add(time.Duration(minutesUntilNextProductionCycle) * time.Minute)
 }
 
+func (sd *ScanningData) CurrentPlayer() Player {
+	p, _ := sd.Players.Get(sd.PlayerUID)
+	return p
+}
+
 func (sd *ScanningData) GameState() string {
 	switch {
 	case sd.GameOver:

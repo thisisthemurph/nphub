@@ -1,6 +1,10 @@
 package model
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/labstack/gommon/log"
+)
 
 type PlayerList map[int]Player
 
@@ -9,6 +13,18 @@ type PlayerList map[int]Player
 func (pl PlayerList) Get(uid int) (Player, bool) {
 	p, ok := pl[uid]
 	return p, ok
+}
+
+// GetCurrent returns the player that owns the snapshot data, based on if research data is available for the player.
+// Returns the first player that has research data available.
+func (pl PlayerList) GetCurrent() (Player, bool) {
+	for _, p := range pl {
+		if p.Researching != "" {
+			return p, true
+		}
+	}
+	log.Warn("No current player found")
+	return Player{}, false
 }
 
 // Sorted returns a slice of Player sorted by TotalStars descending.
