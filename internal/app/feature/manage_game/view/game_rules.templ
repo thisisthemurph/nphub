@@ -7,7 +7,7 @@ import (
 
 templ gameRules(sd npmodel.ScanningData) {
 	<section>
-		<p>Victory: Capture { fmt.Sprint(sd.StarsForVictory) } of { fmt.Sprint(sd.Stars.Count()) } stars</p>
+		<p>Victory: { victoryInformation(sd.StarsForVictory, sd.Stars.Count()) }</p>
 		<p>Turn based: { boolToYesNo(sd.TurnBased) }</p>
 		<p>Scan required for trade: { boolToYesNo(sd.TradeScanned) }</p>
 	</section>
@@ -18,4 +18,12 @@ func boolToYesNo(b bool) string {
 		return "Yes"
 	}
 	return "No"
+}
+
+func victoryInformation(x, y int) string {
+	if y == 0 {
+		return "Division by zero error."
+	}
+	percentage := (float64(x) / float64(y)) * 100
+	return fmt.Sprintf("Capture %d (%.2f%%) of %d stars", x, percentage, y)
 }
