@@ -1,15 +1,23 @@
 package view
 
 import (
+	"fmt"
 	"nphud/internal/app/shared/ui"
-	"nphud/internal/app/feature/manage_game/model"
+	npmodel "nphud/pkg/np/model"
 )
 
-templ ManageGamePage(game model.Game) {
+type ManageGameViewBag struct {
+	GameName           string
+	GameNumber         string
+	LatestScanningData npmodel.ScanningData
+}
+
+templ ManageGamePage(game ManageGameViewBag) {
 	@ui.App() {
 		<section>
-			<h2>Game: { game.Name }</h2>
-			<p>Number: { game.Number }</p>
+			<h2>Game: { game.GameName }</h2>
+			<p>Number: { game.GameNumber }</p>
+			<p>Tick rate: { fmt.Sprint(game.LatestScanningData.TickRate) }</p>
 		</section>
 	}
 }

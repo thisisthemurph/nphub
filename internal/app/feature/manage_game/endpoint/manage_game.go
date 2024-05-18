@@ -1,15 +1,17 @@
 package endpoint
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/mehdihadeli/go-mediatr"
 	"nphud/cmd/app/setup/contract"
 	"nphud/cmd/app/setup/contract/params"
 	"nphud/internal/app/feature/manage_game/command"
 	"nphud/internal/app/feature/manage_game/model"
 	"nphud/internal/app/feature/manage_game/view"
 	"nphud/internal/app/shared/ui"
+	npmodel "nphud/pkg/np/model"
 	"strconv"
+
+	"github.com/labstack/echo/v4"
+	"github.com/mehdihadeli/go-mediatr"
 )
 
 type manageGameEndpoint struct {
@@ -34,12 +36,24 @@ func (ep *manageGameEndpoint) handler() echo.HandlerFunc {
 			return err
 		}
 
-		cmd := command.NewGetGameByRowIDQuery(gameId)
-		gameResult, err := mediatr.Send[*command.GetGameByRowIDQuery, model.Game](c.Request().Context(), cmd)
+		grCmd := command.NewGetGameByRowIDQuery(gameId)
+		gameResult, err := mediatr.Send[*command.GetGameByRowIDQuery, model.Game](c.Request().Context(), grCmd)
 		if err != nil {
 			return err
 		}
 
-		return ui.Render(c, view.ManageGamePage(gameResult))
+		ssCmd := command.NewGetLatestScanningDataQuery(gameResult.Number, gameResult.PlayerUID)
+		snapshotResult, err := mediatr.Send[*command.GetLatestScanningDataQuery, npmodel.ScanningData](c.Request().Context(), ssCmd)
+		if err != nil {
+			return err
+		}
+
+		viewBag := view.ManageGameViewBag{
+			GameName:           gameResult.Name,
+			GameNumber:         gameResult.Number,
+			LatestScanningData: snapshotResult,
+		}
+
+		return ui.Render(c, view.ManageGamePage(viewBag))
 	}
 }
