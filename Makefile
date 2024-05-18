@@ -1,8 +1,9 @@
 test:
 	@go test -v ./...
 
-api:
-	@go run ./cmd/api
+app:
+	@templ generate
+	@go run ./cmd/app
 
 bg:
 	@go run ./cmd/background
