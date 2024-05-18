@@ -1,0 +1,43 @@
+package view
+
+import "fmt"
+import npmodel "nphud/pkg/np/model"
+
+type PlayerDataViewBag struct {
+	HomeStar npmodel.Star
+
+	npmodel.Player
+}
+
+templ PlayerData(player PlayerDataViewBag) {
+	<section id="player-data">
+		<h2>{ player.Name() }</h2>
+		@homeStar(player.UID, player.HomeStar)
+		@totalStats(player.Player)
+	</section>
+}
+
+templ homeStar(playerUID int, homeStar npmodel.Star) {
+	if homeStar.PlayerUID == playerUID {
+		<p>Home star is { homeStar.Name }</p>
+	} else {
+		<p>Home Star was { homeStar.Name }</p>
+	}
+	if homeStar.Visible {
+		<p>{ fmt.Sprint(homeStar.ResourceLevel) }</p>
+	}
+}
+
+templ totalStats(p npmodel.Player) {
+	<div>
+		<p>Total Economy: { str(p.TotalEconomy) }</p>
+		<p>Total Industry: { str(p.TotalIndustry) }</p>
+		<p>Total Science: { str(p.TotalScience) }</p>
+		<p>Total Fleets: { str(p.TotalFleets) }</p>
+		<p>Total Ships: { str(p.TotalStrength) }</p>
+	</div>
+}
+
+func str(a ...any) string {
+	return fmt.Sprint(a...)
+}

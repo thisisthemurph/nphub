@@ -32,8 +32,13 @@ templ ManageGamePage(bag ManageGameViewBag) {
 			<p>Productions: { fmt.Sprint(bag.LatestScanningData.Productions) }</p>
 			<p>Current tick: { fmt.Sprint(bag.LatestScanningData.Tick) }</p>
 		</section>
-		@Leaderboard(bag.LatestScanningData.Players)
 		@gameRules(bag.LatestScanningData)
+		<section class="w-full flex gap-8">
+			@Leaderboard(bag.LatestScanningData.Players)
+			<section id="player-data">
+				<p>Select a player to see their data...</p>
+			</section>
+		</section>
 	}
 }
 
