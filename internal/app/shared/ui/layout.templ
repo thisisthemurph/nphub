@@ -2,7 +2,7 @@ package ui
 
 templ App() {
 	<!DOCTYPE html>
-	<html lang="en" data-theme="light">
+	<html lang="en" data-theme="dark">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -17,12 +17,16 @@ templ App() {
 			<script src="/public/htmx/htmx1.9.12.min.js"></script>
 		</head>
 		<body>
+			@navbar()
 			<main>
-				<header>
-					<h1 class="text-2xl">NP HUD</h1>
-				</header>
 				{ children... }
 			</main>
 		</body>
 	</html>
+}
+
+templ Container() {
+	<section class="px-6 py-4">
+		{ children... }
+	</section>
 }
