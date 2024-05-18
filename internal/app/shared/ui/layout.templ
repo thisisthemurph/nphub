@@ -1,15 +1,14 @@
 package ui
 
 templ App() {
-    <!DOCTYPE html>
-	<html lang="en">
+	<!DOCTYPE html>
+	<html lang="en" data-theme="light">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>NP HUD</title>
-
 			<!-- <link rel="icon" type="image/x-icon" href="/public/favicon.ico"/> -->
-			<!-- <link rel="stylesheet" href="/public/app.css" type="text/css"/> -->
+			<link rel="stylesheet" href="/public/css/app.css" type="text/css"/>
 			<!-- FONTS -->
 			<link rel="preconnect" href="https://fonts.googleapis.com"/>
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -18,12 +17,12 @@ templ App() {
 			<script src="/public/htmx/htmx1.9.12.min.js"></script>
 		</head>
 		<body>
-            <main>
-                <header>
-                    <h1>NP HUD</h1>
-                </header>
-                { children... }
-            </main>
-        </body>
+			<main>
+				<header>
+					<h1 class="text-2xl">NP HUD</h1>
+				</header>
+				{ children... }
+			</main>
+		</body>
 	</html>
 }

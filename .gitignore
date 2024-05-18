@@ -1,8 +1,11 @@
 # Project specific
+tailwindcss
+app.css
 np.db
 snapshots/*
 .env
 *_templ.go
+node_modules
 
 !**/.gitkeep
 
