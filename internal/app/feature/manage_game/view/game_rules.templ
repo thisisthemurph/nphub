@@ -1,0 +1,21 @@
+package view
+
+import (
+	"fmt"
+	npmodel "nphud/pkg/np/model"
+)
+
+templ gameRules(sd npmodel.ScanningData) {
+	<section>
+		<p>Victory: Capture { fmt.Sprint(sd.StarsForVictory) } of { fmt.Sprint(sd.Stars.Count()) } stars</p>
+		<p>Turn based: { boolToYesNo(sd.TurnBased) }</p>
+		<p>Scan required for trade: { boolToYesNo(sd.TradeScanned) }</p>
+	</section>
+}
+
+func boolToYesNo(b bool) string {
+	if b {
+		return "Yes"
+	}
+	return "No"
+}

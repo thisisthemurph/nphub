@@ -17,13 +17,29 @@ func GetGameURL(number string) templ.SafeURL {
 	return templ.URL(url)
 }
 
-templ ManageGamePage(game ManageGameViewBag) {
+templ ManageGamePage(bag ManageGameViewBag) {
 	@ui.App() {
 		<section>
-			<h2><a href={ GetGameURL(game.GameNumber) } target="_blank">{ game.GameName }</a></h2>
-			<p>Number: { game.GameNumber }</p>
-			<p>Tick rate: { fmt.Sprint(game.LatestScanningData.TickRate) }</p>
+			<h2>
+				<a href={ GetGameURL(bag.GameNumber) } target="_blank">
+					{ bag.GameName }
+				</a>
+				<span>({ bag.LatestScanningData.GameState() })</span>
+			</h2>
+			<p>Number: { bag.GameNumber }</p>
+			<p>Tick rate: { tickRateString(bag.LatestScanningData.TickRate) }</p>
+			<p>Production rate: Every { fmt.Sprint(bag.LatestScanningData.ProductionRate) } hours</p>
+			<p>Productions: { fmt.Sprint(bag.LatestScanningData.Productions) }</p>
+			<p>Current tick: { fmt.Sprint(bag.LatestScanningData.Tick) }</p>
 		</section>
-		@Leaderboard(game.LatestScanningData.Players)
+		@Leaderboard(bag.LatestScanningData.Players)
+		@gameRules(bag.LatestScanningData)
 	}
+}
+
+func tickRateString(pr int) string {
+	if pr == 60 {
+		return "Every hour"
+	}
+	return fmt.Sprintf("Every %d minutes", pr)
 }

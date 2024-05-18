@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"nphud/pkg/util"
 	"time"
 )
 
@@ -15,13 +16,13 @@ type ScanningData struct {
 	TickRate          int           `json:"tick_rate"`          // Number of minutes per tick
 	ProductionRate    int           `json:"production_rate"`    // Number of ticks per production cycle
 	ProductionCounter int           `json:"production_counter"` // Current tick within the production cycle
-	Stars             map[int]Star  `json:"stars"`
+	Stars             StarList      `json:"stars"`
 	StarsForVictory   int           `json:"stars_for_victory"`
 	GameOver          bool          `json:"game_over"` // int in original JSON
 	Started           bool          `json:"started"`
 	StartTime         time.Time     `json:"start_time"`
 	TotalStars        int           `json:"total_stars"`
-	TradeScanned      int           `json:"trade_scanned"`
+	TradeScanned      bool          `json:"trade_scanned"` // Flag if trading is restricted to scanned players
 	Tick              int           `json:"tick"`
 	TradeCost         int           `json:"trade_cost"`
 	Name              string        `json:"name"`
@@ -43,14 +44,28 @@ func (sd *ScanningData) GetNextProductionTime() time.Time {
 	return time.Now().Add(time.Duration(minutesUntilNextProductionCycle) * time.Minute)
 }
 
+func (sd *ScanningData) GameState() string {
+	switch {
+	case sd.GameOver:
+		return "Game over"
+	case !sd.Started:
+		return "Not started"
+	case sd.Paused:
+		return "Paused"
+	default:
+		return "Started"
+	}
+}
+
 func (sd *ScanningData) UnmarshalJSON(data []byte) error {
 	type Alias ScanningData
 	aux := struct {
-		Now       int64 `json:"now"`
-		StartTime int64 `json:"start_time"`
-		GameOver  int   `json:"game_over"`
-		Admin     int   `json:"admin"`
-		TurnBased int   `json:"turn_based"`
+		Now          int64 `json:"now"`
+		StartTime    int64 `json:"start_time"`
+		GameOver     int   `json:"game_over"`
+		Admin        int   `json:"admin"`
+		TurnBased    int   `json:"turn_based"`
+		TradeScanned int   `json:"trade_scanned"`
 		*Alias
 	}{
 		Alias: (*Alias)(sd),
@@ -60,18 +75,13 @@ func (sd *ScanningData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	sd.Now = timeFromUnixMilliseconds(aux.Now)
-	sd.StartTime = timeFromUnixMilliseconds(aux.StartTime)
+	sd.Now = util.TimeFromUnixMilliseconds(aux.Now)
+	sd.StartTime = util.TimeFromUnixMilliseconds(aux.StartTime)
 	sd.GameOver = aux.GameOver == 1
 	sd.Admin = aux.Admin == 1
 	sd.TurnBased = aux.TurnBased == 1
+	sd.TradeScanned = aux.TradeScanned == 1
 
 	sd.StartTimeRaw = aux.StartTime
 	return nil
-}
-
-func timeFromUnixMilliseconds(ms int64) time.Time {
-	seconds := ms / 1000
-	nanoseconds := (ms % 1000) * 1_000_000
-	return time.Unix(seconds, nanoseconds)
 }
