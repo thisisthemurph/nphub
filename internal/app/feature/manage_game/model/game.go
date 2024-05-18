@@ -5,7 +5,7 @@ import "time"
 type Game struct {
 	Name           string
 	Number         string
-	PlayerUID      string
+	PlayerUID      int
 	APIKey         string
 	StartTime      time.Time
 	TickRate       int
