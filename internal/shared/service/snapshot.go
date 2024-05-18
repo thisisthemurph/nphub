@@ -5,11 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"nphud/pkg/np"
 	"os"
 	"path/filepath"
 )
 
-var ErrSnapshotDataMalformed = errors.New("malformed snapshot data")
+var (
+	ErrFileNotFound          = errors.New("snapshot file does not exist")
+	ErrSnapshotDataMalformed = errors.New("malformed snapshot data")
+)
 
 // SnapshotFileService is a service for dealing with snapshot files.
 type SnapshotFileService struct {
@@ -35,6 +39,24 @@ func (s SnapshotFileService) Save(gameNumber string, data []byte) (string, error
 	}
 
 	return fileName, nil
+}
+
+// Get returns snapshot data for the given fileName.
+// Returns an error if the file does not exist or if the JSON cannot be unmarshalled.
+func (s SnapshotFileService) Get(fileName string) (np.APIResponse, error) {
+	var snapshot np.APIResponse
+	filePath := fmt.Sprintf("%s/%s", s.basePath, fileName)
+
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return snapshot, err
+	}
+
+	if err = json.Unmarshal(b, &snapshot); err != nil {
+		return snapshot, err
+	}
+
+	return snapshot, nil
 }
 
 // makeFileName creates a file name with details present in the provided bytes JSON data.
