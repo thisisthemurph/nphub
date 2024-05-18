@@ -32,6 +32,10 @@ type Player struct {
 	KarmaToGive     int                     `json:"karma_to_give"`
 }
 
+func (p *Player) IsCurrentPlayer() bool {
+	return p.Researching != ""
+}
+
 func (p *Player) Name() string {
 	if p.AI {
 		return fmt.Sprintf("%s (AI)", p.Alias)
