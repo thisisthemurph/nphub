@@ -13,7 +13,7 @@ type Player struct {
 	AvatarID        int                     `json:"avatar"`
 	HomeStarUID     int                     `json:"huid"`
 	Cash            int                     `json:"cash"` // Only available for the current Player
-	Tech            map[string]TechLevel    `json:"tech"`
+	Tech            TechList                `json:"tech"`
 	Researching     string                  `json:"researching"`      // Only available for the current Player
 	ResearchingNext string                  `json:"researching_next"` // Only available for the current Player
 	TotalIndustry   int                     `json:"total_industry"`
@@ -51,6 +51,7 @@ func (p *Player) UnmarshalJSON(data []byte) error {
 		Ready          int `json:"ready"`
 		War            map[string]int
 		CountdownToWar map[string]int
+		Tech           map[string]TechLevel `json:"tech"`
 		*Alias
 	}{
 		Alias: (*Alias)(p),
@@ -74,6 +75,13 @@ func (p *Player) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CountdownToWar[playerUID] = ticks
+	}
+
+	for tn, level := range aux.Tech {
+		p.Tech = append(p.Tech, Tech{
+			Name:      TechName(tn),
+			TechLevel: level,
+		})
 	}
 
 	p.AI = aux.AI == 1
