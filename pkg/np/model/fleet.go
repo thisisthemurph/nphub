@@ -15,7 +15,7 @@ type Fleet struct {
 	Warping   bool           `json:"w"`
 	X         float32        `json:"x"`
 	Y         float32        `json:"y"`
-	Strength  int            `json:"st"` // Number of ships
+	ShipCount int            `json:"st"` // Number of ships
 	LastX     float32        `json:"lx"`
 	LastY     float32        `json:"ly"`
 }
@@ -61,13 +61,13 @@ func (f *Fleet) UnmarshalJSON(data []byte) error {
 		delay := o[0]
 		uid := o[1]
 		orderTypeID := o[2]
-		numShips := o[3]
+		shipCount := o[3]
 
 		carrierOrder := CarrierOrder{
-			Delay:         delay,
-			UID:           uid,
-			OrderTypeID:   CarrierOrderType(orderTypeID),
-			NumberOfShips: numShips,
+			Delay:       delay,
+			UID:         uid,
+			OrderTypeID: CarrierOrderType(orderTypeID),
+			ShipCount:   shipCount,
 		}
 
 		f.Orders = append(f.Orders, carrierOrder)

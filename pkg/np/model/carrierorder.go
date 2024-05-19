@@ -1,10 +1,10 @@
 package model
 
 type CarrierOrder struct {
-	Delay         int
-	UID           int
-	OrderTypeID   CarrierOrderType
-	NumberOfShips int
+	Delay       int
+	UID         int
+	OrderTypeID CarrierOrderType
+	ShipCount   int
 }
 
 type CarrierOrderType int

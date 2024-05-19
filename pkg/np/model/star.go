@@ -12,7 +12,7 @@ type Star struct {
 	Name             string  `json:"n"`
 	PlayerUID        int     `json:"puid"`
 	Visible          bool    `json:"v"`
-	Strength         int     `json:"st"` // Number of ships on the star
+	ShipCount        int     `json:"st"` // Number of ships on the star
 	NaturalResources int     `json:"nr"`
 	ResourceLevel    int     `json:"r"` // Resource level of the star including terraforming bonus
 	EconomyLevel     int     `json:"e"`

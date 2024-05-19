@@ -21,7 +21,7 @@ type Player struct {
 	TotalScience    int                     `json:"total_science"`
 	TotalStars      int                     `json:"total_stars"`
 	TotalFleets     int                     `json:"total_fleets"`
-	TotalStrength   int                     `json:"total_strength"` // Total ships the Player has
+	TotalShips      int                     `json:"total_strength"` // Total ships the Player has
 	War             map[int]PlayerWarStatus `json:"war"`
 	CountdownToWar  map[int]int             `json:"countdown_to_war"` // An object containing all Player IDs and the number of ticks until war starts, if a permanent alliance has ended
 	Ready           bool                    `json:"ready"`
