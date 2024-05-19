@@ -2,6 +2,7 @@ package view
 
 import (
 	"nphud/internal/app/shared/ui"
+	"nphud/pkg/form"
 )
 
 templ CreateGamePage() {
@@ -11,26 +12,69 @@ templ CreateGamePage() {
 				<div class="prose border border-white p-4 rounded-lg shadow-xl max-w-96">
 					<h2>Add a new game</h2>
 					<p class="">Add one of your current games here using the game number and API key.</p>
-					@createGameForm()
+					@CreateGameForm(NewCreateGameFormProps("", ""))
 				</div>
 			</section>
 		}
 	}
 }
 
-templ createGameForm() {
+type CreateGameFormProps struct {
+	Number string
+	Key    string
+
+	Errors *form.FormErrors
+}
+
+func NewCreateGameFormProps(gameNumber, apiKey string) *CreateGameFormProps {
+	return &CreateGameFormProps{
+		Number: gameNumber,
+		Key:    apiKey,
+		Errors: form.NewFormErrors(),
+	}
+}
+
+func (f *CreateGameFormProps) Validate() bool {
+	f.Errors = form.NewFormErrors()
+
+	if f.Number == "" {
+		f.Errors.Set("number", "Game number is required")
+	}
+
+	if f.Key == "" {
+		f.Errors.Set("key", "Game API key is required")
+	}
+
+	return !f.Errors.HasError()
+}
+
+templ CreateGameForm(props *CreateGameFormProps) {
 	<form hx-post="/game" hx-swap="outerHTML" class="w-full flex flex-col gap-2">
 		<label class="form-control w-full">
 			<div class="label">
 				<span class="label-text">Game number</span>
 			</div>
-			<input type="text" name="game_number" placeholder="The game's number" class="input input-bordered w-full"/>
+			<input
+				type="text"
+				name="game_number"
+				placeholder="The game's number"
+				class="input input-bordered w-full"
+				value={ props.Number }
+			/>
+			@ui.FormError("number", props.Errors)
 		</label>
 		<label class="form-control w-full">
 			<div class="label">
 				<span class="label-text">API key</span>
 			</div>
-			<input type="text" name="api_key" placeholder="Your generated API key" class="input input-bordered w-full"/>
+			<input
+				type="text"
+				name="api_key"
+				placeholder="Your generated API key"
+				class="input input-bordered w-full"
+				value={ props.Key }
+			/>
+			@ui.FormError("key", props.Errors)
 		</label>
 		<button type="submit" class="mt-4 btn btn-primary">Create</button>
 	</form>

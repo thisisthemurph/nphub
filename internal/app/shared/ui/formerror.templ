@@ -1,0 +1,11 @@
+package ui
+
+import "nphud/pkg/form"
+
+templ FormError(field string, errs *form.FormErrors) {
+	if err, ok := errs.Get(field); ok {
+		<div class="label">
+			<span class="label-text-alt text-red-500">{ err.Error() }</span>
+		</div>
+	}
+}
