@@ -19,26 +19,28 @@ func GetGameURL(number string) templ.SafeURL {
 
 templ ManageGamePage(bag ManageGameViewBag) {
 	@ui.App() {
-		<section>
-			<h2>
-				<a href={ GetGameURL(bag.GameNumber) } target="_blank">
-					{ bag.GameName }
-				</a>
-				<span>({ bag.LatestScanningData.GameState() })</span>
-			</h2>
-			<p>Number: { bag.GameNumber }</p>
-			<p>Tick rate: { tickRateString(bag.LatestScanningData.TickRate) }</p>
-			<p>Production rate: Every { fmt.Sprint(bag.LatestScanningData.ProductionRate) } hours</p>
-			<p>Productions: { fmt.Sprint(bag.LatestScanningData.Productions) }</p>
-			<p>Current tick: { fmt.Sprint(bag.LatestScanningData.Tick) }</p>
-		</section>
-		@gameRules(bag.LatestScanningData)
-		<section class="w-full flex gap-8">
-			@Leaderboard(bag.LatestScanningData.Players)
-			<section id="player-data">
-				<p>Select a player to see their data...</p>
+		@ui.Container() {
+			<section>
+				<h2>
+					<a href={ GetGameURL(bag.GameNumber) } target="_blank">
+						{ bag.GameName }
+					</a>
+					<span>({ bag.LatestScanningData.GameState() })</span>
+				</h2>
+				<p>Number: { bag.GameNumber }</p>
+				<p>Tick rate: { tickRateString(bag.LatestScanningData.TickRate) }</p>
+				<p>Production rate: Every { fmt.Sprint(bag.LatestScanningData.ProductionRate) } hours</p>
+				<p>Productions: { fmt.Sprint(bag.LatestScanningData.Productions) }</p>
+				<p>Current tick: { fmt.Sprint(bag.LatestScanningData.Tick) }</p>
 			</section>
-		</section>
+			@gameRules(bag.LatestScanningData)
+			<section class="w-full flex gap-8">
+				@Leaderboard(bag.LatestScanningData.Players)
+				<section id="player-data">
+					<p>Select a player to see their data...</p>
+				</section>
+			</section>
+		}
 	}
 }
 

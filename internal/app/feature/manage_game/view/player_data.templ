@@ -14,6 +14,7 @@ templ PlayerData(player PlayerDataViewBag) {
 		<h2>{ player.Name() }</h2>
 		@homeStar(player.UID, player.HomeStar)
 		@totalStats(player.Player)
+		@techResearch(player.Tech)
 	</section>
 }
 
@@ -35,6 +36,15 @@ templ totalStats(p npmodel.Player) {
 		<p>Total Science: { str(p.TotalScience) }</p>
 		<p>Total Fleets: { str(p.TotalFleets) }</p>
 		<p>Total Ships: { str(p.TotalStrength) }</p>
+	</div>
+}
+
+templ techResearch(techList npmodel.TechList) {
+	<div>
+		<p>Research progress</p>
+		for _, tech := range techList {
+			<p>{ tech.Name.String() }: Level { fmt.Sprint(tech.Level) } Value: { fmt.Sprint(tech.Value) }</p>
+		}
 	</div>
 }
 
