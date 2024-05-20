@@ -6,6 +6,7 @@ import (
 	"nphud/internal/app/feature/create_game/command"
 	"nphud/internal/app/feature/create_game/view"
 	"nphud/internal/app/shared/ui"
+	"nphud/pkg/np"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -25,21 +26,29 @@ var (
 func (ep *createGameEndpoint) createGameHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-		request := &CreateGameRequest{}
-		if err := c.Bind(request); err != nil {
+		req := &CreateGameRequest{}
+		if err := c.Bind(req); err != nil {
 			return err
 		}
 
 		form := view.NewCreateGameFormProps(
-			strings.TrimSpace(request.GameNumber),
-			strings.TrimSpace(request.APIKey),
+			strings.TrimSpace(req.GameNumber),
+			strings.TrimSpace(req.APIKey),
 		)
 
 		if !form.Validate() {
 			return ui.Render(c, view.CreateGameForm(form))
+
 		}
 
-		cmd := command.NewCreateGameCommand(request.GameNumber, request.APIKey)
+		game := np.New(form.Number, form.Key)
+		if !game.Validate() {
+			// The given number and api key combination is not correct.
+			form.Errors.Set("key", "The given game number and API key does not match any current games.")
+			return ui.Render(c, view.CreateGameForm(form))
+		}
+
+		cmd := command.NewCreateGameCommand(req.GameNumber, req.APIKey)
 		result, err := mediatr.Send[*command.CreateGameCommand, command.CreateGameResult](ctx, cmd)
 		if err != nil {
 			return err
