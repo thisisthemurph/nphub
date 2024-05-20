@@ -4,6 +4,7 @@ const apiBaseURL string = "https://np.ironhelmet.com/api"
 
 type NeptunesPrideGame struct {
 	Number string
+	APIKey string
 
 	api api
 }
@@ -11,6 +12,7 @@ type NeptunesPrideGame struct {
 func New(gameNumber, apiKey string) NeptunesPrideGame {
 	return NeptunesPrideGame{
 		Number: gameNumber,
+		APIKey: apiKey,
 		api:    newAPI(gameNumber, apiKey),
 	}
 }
