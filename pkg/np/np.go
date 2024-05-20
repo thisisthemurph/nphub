@@ -21,3 +21,8 @@ func New(gameNumber, apiKey string) NeptunesPrideGame {
 func (np NeptunesPrideGame) TakeSnapshot() ([]byte, error) {
 	return np.api.GetCurrentSnapshot()
 }
+
+func (np NeptunesPrideGame) Validate() bool {
+	_, err := np.api.GetCurrentSnapshot()
+	return err == nil
+}
