@@ -87,8 +87,14 @@ func (c *CreateGameCommandHandler) insertNewGameInDatabase(ctx context.Context, 
 			production_rate,
 			started,
 			paused,
-			game_over
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+			game_over,
+			next_snapshot_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+
+	nextTickTime, err := np.CalculateNextTickTime(scanning.StartTime, scanning.TickRate)
+	if err != nil {
+		return 0, err
+	}
 
 	res, err := tx.Exec(
 		stmt,
@@ -102,6 +108,7 @@ func (c *CreateGameCommandHandler) insertNewGameInDatabase(ctx context.Context, 
 		util.BoolToInt(scanning.Started),
 		util.BoolToInt(scanning.Paused),
 		util.BoolToInt(scanning.GameOver),
+		nextTickTime.UnixMilli(),
 	)
 
 	if err != nil {

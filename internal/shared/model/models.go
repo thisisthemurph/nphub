@@ -10,6 +10,7 @@ type GameRow struct {
 	StartTime      int64
 	TickRate       int
 	ProductionRate int
+	NextSnapshotAt int64
 }
 
 type SnapshotRow struct {
