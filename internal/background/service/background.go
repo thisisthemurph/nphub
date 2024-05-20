@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
-	"nphud/internal/background/types"
-	"nphud/internal/shared/model"
+	"nphud/pkg/np"
 	"time"
 )
 
@@ -21,72 +20,29 @@ func NewBackgroundService(db *sql.DB) BackgroundService {
 	}
 }
 
-func (bs BackgroundService) ListGames() ([]types.GameWithSnapshots, error) {
+func (bs BackgroundService) GetGamesRequiringNewSnapshot() ([]np.NeptunesPrideGame, error) {
 	stmt := `
-	select
-	  g.id,
-	  g.number,
-	  g.player_uid,
-	  g.api_key,
-	  g.start_time,
-	  g.tick_rate,
-	  g.production_rate,
-	  s.id,
-	  s.path,
-	  s.created_at
-	from games g
-	left join snapshots s on s.game_id = g.id
-	order by g.id, s.created_at;`
+		select number, api_key
+		from games
+		where next_snapshot_at <= ?;`
 
-	rows, err := bs.db.Query(stmt)
+	rows, err := bs.db.Query(stmt, time.Now().UnixMilli())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	gamesMap := make(map[int64]types.GameWithSnapshots)
+	games := make([]np.NeptunesPrideGame, 0)
 	for rows.Next() {
-		var g model.GameRow
-		var s model.SnapshotRow
-
-		err = rows.Scan(
-			&g.ID,
-			&g.Number,
-			&g.PlayerUID,
-			&g.APIKey,
-			&g.StartTime,
-			&g.TickRate,
-			&g.ProductionRate,
-			&s.ID,
-			&s.Path,
-			&s.CreatedAt,
-		)
-		if err != nil {
+		var number string
+		var key string
+		if err := rows.Scan(&number, &key); err != nil {
 			return nil, err
 		}
-
-		if gws, ok := gamesMap[g.ID]; ok {
-			gws.Snapshots = append(gws.Snapshots, s)
-			gamesMap[g.ID] = gws
-		} else {
-			if s.ID.Valid {
-				gamesMap[g.ID] = types.GameWithSnapshots{
-					GameRow:   g,
-					Snapshots: []model.SnapshotRow{s},
-				}
-			} else {
-				gamesMap[g.ID] = types.GameWithSnapshots{
-					GameRow: g,
-				}
-			}
-		}
+		games = append(games, np.New(number, key))
 	}
 
-	var gamesWithSnapshots []types.GameWithSnapshots
-	for _, g := range gamesMap {
-		gamesWithSnapshots = append(gamesWithSnapshots, g)
-	}
-	return gamesWithSnapshots, nil
+	return games, nil
 }
 
 func (bs BackgroundService) AddSnapshotToDatabase(gameNumber, apiKey, snapshotFileName string) error {
@@ -97,13 +53,31 @@ func (bs BackgroundService) AddSnapshotToDatabase(gameNumber, apiKey, snapshotFi
 	}
 	defer tx.Rollback()
 
-	stmt := "select id from games where number = ? and api_key = ?;"
-	var gameRowId int64
-	err = tx.QueryRow(stmt, gameNumber, apiKey).Scan(&gameRowId)
+	var (
+		gameRowId       int64
+		startTimeMillis int64
+		tickRate        int
+	)
+
+	stmt := "select id, start_time, tick_rate from games where number = ? and api_key = ?;"
+	err = tx.QueryRow(stmt, gameNumber, apiKey).Scan(&gameRowId, &startTimeMillis, &tickRate)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrGameNotFound
 		}
+		return err
+	}
+
+	gameStartTime := time.Unix(0, startTimeMillis*int64(time.Millisecond))
+	nextTickTime, err := np.CalculateNextTickTime(gameStartTime, tickRate)
+	if err != nil {
+		slog.Error("error calculating next tick time", "err", err)
+		return err
+	}
+
+	stmt = "update games set next_snapshot_at = ? where id = ?;"
+	if _, err := tx.Exec(stmt, nextTickTime.UnixMilli(), gameRowId); err != nil {
+		slog.Error("error updating next_snapshot_time", "err", err)
 		return err
 	}
 
