@@ -24,6 +24,7 @@ var (
 )
 
 func (ep *createGameEndpoint) createGameHandler() echo.HandlerFunc {
+	// TODO: If the game exists but for a game with the current number and player uid, update the key
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 		req := &CreateGameRequest{}
@@ -38,7 +39,6 @@ func (ep *createGameEndpoint) createGameHandler() echo.HandlerFunc {
 
 		if !form.Validate() {
 			return ui.Render(c, view.CreateGameForm(form))
-
 		}
 
 		game := np.New(form.Number, form.Key)
@@ -48,7 +48,7 @@ func (ep *createGameEndpoint) createGameHandler() echo.HandlerFunc {
 			return ui.Render(c, view.CreateGameForm(form))
 		}
 
-		cmd := command.NewCreateGameCommand(req.GameNumber, req.APIKey)
+		cmd := command.NewCreateGameCommand(game.Number, game.APIKey)
 		result, err := mediatr.Send[*command.CreateGameCommand, command.CreateGameResult](ctx, cmd)
 		if err != nil {
 			return err
