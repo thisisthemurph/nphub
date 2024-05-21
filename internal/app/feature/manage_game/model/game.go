@@ -1,8 +1,13 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Game struct {
+	ExternalId     uuid.UUID
 	Name           string
 	Number         string
 	PlayerUID      int
