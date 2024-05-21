@@ -1,5 +1,6 @@
 create table if not exists games (
     id integer primary key,
+    external_id text not null,
     name text not null,
     number text not null,
     player_uid integer not null,

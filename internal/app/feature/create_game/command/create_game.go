@@ -11,6 +11,8 @@ import (
 	"nphud/pkg/np/model"
 	"nphud/pkg/util"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type CreateGameCommand struct {
@@ -135,6 +137,7 @@ func insertNewGameRow(
 
 	stmt := `
 	insert into games (
+		external_id,
 		name,
 		number,
 		api_key,
@@ -146,10 +149,11 @@ func insertNewGameRow(
 		paused,
 		game_over,
 		next_snapshot_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
 	res, err := tx.Exec(
 		stmt,
+		uuid.New(),
 		scanning.Name,
 		gameNumber,
 		apiKey,
