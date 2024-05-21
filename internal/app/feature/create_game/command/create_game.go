@@ -97,7 +97,7 @@ func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, cmd
 	if gameExists {
 		gameRowId = existingGameID
 		if cmd.APIKey != existingGameApiKey {
-			err = updateExistingGameRowApiKey(tx, gameRowId, existingGameApiKey)
+			err = updateExistingGameRowApiKey(tx, gameRowId, cmd.APIKey)
 		}
 	} else {
 		gameRowId, err = insertNewGameRow(tx, cmd.Number, cmd.APIKey, scanning)
