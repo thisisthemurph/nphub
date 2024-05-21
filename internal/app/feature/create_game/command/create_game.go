@@ -80,11 +80,11 @@ func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gam
 	var existingGameID int64
 	var existingGameApiKey string
 	stmt = `select id, api_key from games where number = ? and player_uid = ?;`
-	err = c.db.QueryRow(stmt, gameNumber, scanning.PlayerUID).Scan(&existingGameID, &existingGameApiKey)
-	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			slog.Error("error fetching game from db", "err", err)
-			return 0, err
+	getGameErr := c.db.QueryRow(stmt, gameNumber, scanning.PlayerUID).Scan(&existingGameID, &existingGameApiKey)
+	if getGameErr != nil {
+		if !errors.Is(getGameErr, sql.ErrNoRows) {
+			slog.Error("error fetching game from db", "err", getGameErr)
+			return 0, getGameErr
 		}
 	}
 
@@ -92,7 +92,9 @@ func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gam
 	var gameRowId int64
 	gameExists := existingGameApiKey != ""
 	if gameExists {
-		err = updateExistingGameRow(tx, gameNumber, apiKey, existingGameApiKey)
+		if apiKey != existingGameApiKey {
+			err = updateExistingGameRow(tx, gameNumber, apiKey, existingGameApiKey)
+		}
 		gameRowId = existingGameID
 	} else {
 		gameRowId, err = insertNewGameRow(tx, gameNumber, apiKey, scanning)
@@ -165,6 +167,7 @@ func insertNewGameRow(
 	return res.LastInsertId()
 }
 
+// updateExistingGameRow updates the apiKey for the game.
 func updateExistingGameRow(tx *sql.Tx, gameNumber, apiKey, existingGameApiKey string) error {
 	stmt := `update games set api_key = ? where number = ? and api_key = ?;`
 	_, err := tx.Exec(stmt, apiKey, gameNumber, existingGameApiKey)
