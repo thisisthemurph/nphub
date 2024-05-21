@@ -67,7 +67,7 @@ func (c *CreateGameCommandHandler) Handle(ctx context.Context, cmd *CreateGameCo
 	return CreateGameResult{GameID: gameRowId, SnapshotFileName: snapshotFileName}, nil
 }
 
-func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gameNumber, apiKey, snapshotFileName string, scanning model.ScanningData) (int64, error) {
+func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, cmd *CreateGameCommand, snapshotFileName string, scanning model.ScanningData) (int64, error) {
 	var stmt string
 	tx, err := c.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -77,10 +77,13 @@ func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gam
 	defer tx.Rollback()
 
 	// Determine if the game already exists for the player
-	var existingGameID int64
-	var existingGameApiKey string
+	var (
+		existingGameID     int64
+		existingGameApiKey string
+	)
+
 	stmt = `select id, api_key from games where number = ? and player_uid = ?;`
-	getGameErr := c.db.QueryRow(stmt, gameNumber, scanning.PlayerUID).Scan(&existingGameID, &existingGameApiKey)
+	getGameErr := c.db.QueryRow(stmt, cmd.Number, scanning.PlayerUID).Scan(&existingGameID, &existingGameApiKey)
 	if getGameErr != nil {
 		if !errors.Is(getGameErr, sql.ErrNoRows) {
 			slog.Error("error fetching game from db", "err", getGameErr)
@@ -92,12 +95,12 @@ func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gam
 	var gameRowId int64
 	gameExists := existingGameApiKey != ""
 	if gameExists {
-		if apiKey != existingGameApiKey {
-			err = updateExistingGameRow(tx, gameNumber, apiKey, existingGameApiKey)
-		}
 		gameRowId = existingGameID
+		if cmd.APIKey != existingGameApiKey {
+			err = updateExistingGameRowApiKey(tx, gameRowId, existingGameApiKey)
+		}
 	} else {
-		gameRowId, err = insertNewGameRow(tx, gameNumber, apiKey, scanning)
+		gameRowId, err = insertNewGameRow(tx, cmd.Number, cmd.APIKey, scanning)
 	}
 	if err != nil {
 		slog.Error("could not upsert games row", "isUpdate", gameExists, "err", err)
@@ -167,9 +170,8 @@ func insertNewGameRow(
 	return res.LastInsertId()
 }
 
-// updateExistingGameRow updates the apiKey for the game.
-func updateExistingGameRow(tx *sql.Tx, gameNumber, apiKey, existingGameApiKey string) error {
-	stmt := `update games set api_key = ? where number = ? and api_key = ?;`
-	_, err := tx.Exec(stmt, apiKey, gameNumber, existingGameApiKey)
+// updateExistingGameRowApiKey updates the apiKey for the game.
+func updateExistingGameRowApiKey(tx *sql.Tx, gameRowId int64, newApiKey string) error {
+	_, err := tx.Exec(`update games set api_key = ? id = ?;`, newApiKey, gameRowId)
 	return err
 }
