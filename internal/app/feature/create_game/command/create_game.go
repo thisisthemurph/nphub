@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"nphud/internal/shared/service"
 	"nphud/pkg/np"
@@ -60,7 +61,7 @@ func (c *CreateGameCommandHandler) Handle(ctx context.Context, cmd *CreateGameCo
 		return CreateGameResult{}, err
 	}
 
-	gameRowId, err := c.insertNewGameInDatabase(ctx, cmd.Number, cmd.APIKey, snapshotFileName, snapshot.ScanningData)
+	gameRowId, err := c.upsertGameInDatabase(ctx, cmd.Number, cmd.APIKey, snapshotFileName, snapshot.ScanningData)
 	if err != nil {
 		return CreateGameResult{}, err
 	}
@@ -68,7 +69,8 @@ func (c *CreateGameCommandHandler) Handle(ctx context.Context, cmd *CreateGameCo
 	return CreateGameResult{GameID: gameRowId, SnapshotFileName: snapshotFileName}, nil
 }
 
-func (c *CreateGameCommandHandler) insertNewGameInDatabase(ctx context.Context, gameNumber, apiKey, snapshotFileName string, scanning model.ScanningData) (int64, error) {
+func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gameNumber, apiKey, snapshotFileName string, scanning model.ScanningData) (int64, error) {
+	var stmt string
 	tx, err := c.db.BeginTx(ctx, nil)
 	if err != nil {
 		slog.Error("could not begin transaction", "err", err)
@@ -76,25 +78,69 @@ func (c *CreateGameCommandHandler) insertNewGameInDatabase(ctx context.Context, 
 	}
 	defer tx.Rollback()
 
-	stmt := `
-		insert into games (
-			name,
-			number,
-			api_key,
-			player_uid,
-			start_time,
-			tick_rate,
-			production_rate,
-			started,
-			paused,
-			game_over,
-			next_snapshot_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+	// Determine if the game already exists for the player
+	var existingGameID int64
+	var existingGameApiKey string
+	stmt = `select id, api_key from games where number = ? and player_uid = ?;`
+	err = c.db.QueryRow(stmt, gameNumber, scanning.PlayerUID).Scan(&existingGameID, &existingGameApiKey)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			return 0, err
+		}
+	}
 
+	// Upsert the new games row
+	var gameRowId int64
+	gameExists := existingGameApiKey != ""
+	if gameExists {
+		err = updateExistingGameRow(tx, gameNumber, apiKey, existingGameApiKey)
+		gameRowId = existingGameID
+	} else {
+		gameRowId, err = insertNewGameRow(tx, gameNumber, apiKey, scanning)
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	// Insert the new snapshots row
+	stmt = `insert into snapshots (game_id, path, created_at) values (?, ?, ?);`
+	if _, err = tx.Exec(stmt, gameRowId, snapshotFileName, time.Now().UnixMilli()); err != nil {
+		return 0, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		slog.Error("could not commit transaction", "err", err)
+		return 0, err
+	}
+
+	return gameRowId, nil
+}
+
+func insertNewGameRow(
+	tx *sql.Tx,
+	gameNumber string,
+	apiKey string,
+	scanning model.ScanningData,
+) (int64, error) {
 	nextTickTime, err := np.CalculateNextTickTime(scanning.StartTime, scanning.TickRate)
 	if err != nil {
 		return 0, err
 	}
+
+	stmt := `
+	insert into games (
+		name,
+		number,
+		api_key,
+		player_uid,
+		start_time,
+		tick_rate,
+		production_rate,
+		started,
+		paused,
+		game_over,
+		next_snapshot_at
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
 	res, err := tx.Exec(
 		stmt,
@@ -115,20 +161,11 @@ func (c *CreateGameCommandHandler) insertNewGameInDatabase(ctx context.Context, 
 		return 0, err
 	}
 
-	gameRowId, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
+	return res.LastInsertId()
+}
 
-	stmt = "insert into snapshots (game_id, path, created_at) values (?, ?, ?);"
-	if _, err = tx.Exec(stmt, gameRowId, snapshotFileName, time.Now().UnixMilli()); err != nil {
-		return 0, err
-	}
-
-	if err = tx.Commit(); err != nil {
-		slog.Error("could not commit transaction", "err", err)
-		return 0, err
-	}
-
-	return gameRowId, nil
+func updateExistingGameRow(tx *sql.Tx, gameNumber, apiKey, existingGameApiKey string) error {
+	stmt := `update games set api_key = ? where number = ? and api_key = ?;`
+	_, err := tx.Exec(stmt, apiKey, gameNumber, existingGameApiKey)
+	return err
 }
