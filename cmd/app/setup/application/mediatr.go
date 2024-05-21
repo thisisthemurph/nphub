@@ -36,7 +36,7 @@ func (app *Application) ConfigMediator() error {
 	}
 
 	getGameByRowIdQueryHandler := command2.NewGetGameByRowIDQueryHandler(db)
-	err = mediatr.RegisterRequestHandler[*command2.GetGameByRowIDQuery, model.Game](getGameByRowIdQueryHandler)
+	err = mediatr.RegisterRequestHandler[*command2.GetGameByExternalIdQuery, model.Game](getGameByRowIdQueryHandler)
 	if err != nil {
 		return err
 	}

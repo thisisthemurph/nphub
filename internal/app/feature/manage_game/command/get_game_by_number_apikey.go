@@ -37,6 +37,7 @@ func (h *GetGameByNumberAndAPIKeyQueryHandler) Handle(ctx context.Context, cmd *
 	var game model.Game
 	stmt := `
 	select
+		external_id,
 		name,
 		number, 
 		player_uid, 
@@ -58,6 +59,7 @@ func (h *GetGameByNumberAndAPIKeyQueryHandler) Handle(ctx context.Context, cmd *
 	)
 
 	err := h.db.QueryRowContext(ctx, stmt, cmd.Number, cmd.APIKey).Scan(
+		&game.ExternalId,
 		&game.Name,
 		&game.Number,
 		&game.PlayerUID,

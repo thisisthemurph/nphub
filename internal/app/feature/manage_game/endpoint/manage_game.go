@@ -11,6 +11,7 @@ import (
 	npmodel "nphud/pkg/np/model"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/mehdihadeli/go-mediatr"
 )
@@ -27,7 +28,7 @@ func NewManageGameEndpoint(gameRouteParams *params.GameRouteParams) contract.End
 
 func (ep *manageGameEndpoint) MapEndpoint() {
 	ep.GameGroup.GET("/:gameNumber/:gameApiKey", ep.handler())
-	ep.GameGroup.GET("/:gameId/player/:playerUid", ep.playerDataHandler())
+	ep.GameGroup.GET("/:gameExternalId/player/:playerUid", ep.playerDataHandler())
 }
 
 func (ep *manageGameEndpoint) handler() echo.HandlerFunc {
@@ -51,8 +52,7 @@ func (ep *manageGameEndpoint) handler() echo.HandlerFunc {
 		}
 
 		viewBag := view.ManageGameViewBag{
-			GameName:           gameResult.Name,
-			GameNumber:         gameResult.Number,
+			Game:               gameResult,
 			LatestScanningData: snapshotResult,
 		}
 
@@ -62,20 +62,18 @@ func (ep *manageGameEndpoint) handler() echo.HandlerFunc {
 
 func (ep *manageGameEndpoint) playerDataHandler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		gameIdParam := c.Param("gameId")
-		gameId, err := strconv.Atoi(gameIdParam)
+		gameExternalId, err := uuid.Parse(c.Param("gameExternalId"))
 		if err != nil {
 			return err
 		}
 
-		playerUIDParam := c.Param("playerUid")
-		playerUID, err := strconv.Atoi(playerUIDParam)
+		playerUID, err := strconv.Atoi(c.Param("playerUid"))
 		if err != nil {
 			return err
 		}
 
-		grCmd := command.NewGetGameByRowIDQuery(gameId)
-		gameResult, err := mediatr.Send[*command.GetGameByRowIDQuery, model.Game](c.Request().Context(), grCmd)
+		grCmd := command.NewGetGameByExternalIDQuery(gameExternalId)
+		gameResult, err := mediatr.Send[*command.GetGameByExternalIdQuery, model.Game](c.Request().Context(), grCmd)
 		if err != nil {
 			return err
 		}
