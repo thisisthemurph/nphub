@@ -1,0 +1,16 @@
+package view
+
+import (
+	"nphud/internal/app/shared/ui"
+)
+
+templ GameNotFoundPage() {
+	@ui.App() {
+		@ui.Container() {
+			<section class="prose">
+				<h2>Game not found</h2>
+				<p>A game with the given number and API key could not be found.</p>
+			</section>
+		}
+	}
+}

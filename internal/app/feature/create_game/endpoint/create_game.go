@@ -49,12 +49,12 @@ func (ep *createGameEndpoint) createGameHandler() echo.HandlerFunc {
 		}
 
 		cmd := command.NewCreateGameCommand(game.Number, game.APIKey)
-		result, err := mediatr.Send[*command.CreateGameCommand, command.CreateGameResult](ctx, cmd)
+		_, err := mediatr.Send[*command.CreateGameCommand, command.CreateGameResult](ctx, cmd)
 		if err != nil {
 			return err
 		}
 
-		redirectTarget := fmt.Sprintf("game/%d", result.GameID)
+		redirectTarget := fmt.Sprintf("game/%s/%s", game.Number, game.APIKey)
 		c.Response().Header().Set("HX-Redirect", redirectTarget)
 		return nil
 	}

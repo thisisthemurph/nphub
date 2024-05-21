@@ -29,6 +29,12 @@ func (app *Application) ConfigMediator() error {
 		return err
 	}
 
+	getGameByNumberAndApiKeyHandler := command2.NewGetGameByNumberAndAPIKeyQueryHandler(db)
+	err = mediatr.RegisterRequestHandler[*command2.GetGameByNumberAndAPIKeyQuery, model.Game](getGameByNumberAndApiKeyHandler)
+	if err != nil {
+		return err
+	}
+
 	getGameByRowIdQueryHandler := command2.NewGetGameByRowIDQueryHandler(db)
 	err = mediatr.RegisterRequestHandler[*command2.GetGameByRowIDQuery, model.Game](getGameByRowIdQueryHandler)
 	if err != nil {

@@ -1,6 +1,7 @@
 package endpoint
 
 import (
+	"errors"
 	"nphud/cmd/app/setup/contract"
 	"nphud/cmd/app/setup/contract/params"
 	"nphud/internal/app/feature/manage_game/command"
@@ -25,21 +26,21 @@ func NewManageGameEndpoint(gameRouteParams *params.GameRouteParams) contract.End
 }
 
 func (ep *manageGameEndpoint) MapEndpoint() {
-	ep.GameGroup.GET("/:gameId", ep.handler())
-	ep.GameGroup.GET("/:gameId/:playerUid", ep.playerDataHandler())
+	ep.GameGroup.GET("/:gameNumber/:gameApiKey", ep.handler())
+	ep.GameGroup.GET("/:gameId/player/:playerUid", ep.playerDataHandler())
 }
 
 func (ep *manageGameEndpoint) handler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		gameIdParam := c.Param("gameId")
-		gameId, err := strconv.Atoi(gameIdParam)
-		if err != nil {
-			return err
-		}
+		gameNumber := c.Param("gameNumber")
+		apiKey := c.Param("gameApiKey")
 
-		grCmd := command.NewGetGameByRowIDQuery(gameId)
-		gameResult, err := mediatr.Send[*command.GetGameByRowIDQuery, model.Game](c.Request().Context(), grCmd)
+		grCmd := command.NewGetGameByNumberAndAPIKeyQuery(gameNumber, apiKey)
+		gameResult, err := mediatr.Send[*command.GetGameByNumberAndAPIKeyQuery, model.Game](c.Request().Context(), grCmd)
 		if err != nil {
+			if errors.Is(err, command.ErrGameNotFound) {
+				return ui.Render(c, view.GameNotFoundPage())
+			}
 			return err
 		}
 
