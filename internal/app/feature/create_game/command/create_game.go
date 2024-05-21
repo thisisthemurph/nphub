@@ -85,6 +85,7 @@ func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gam
 	err = c.db.QueryRow(stmt, gameNumber, scanning.PlayerUID).Scan(&existingGameID, &existingGameApiKey)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
+			slog.Error("error fetching game from db", "err", err)
 			return 0, err
 		}
 	}
@@ -99,12 +100,14 @@ func (c *CreateGameCommandHandler) upsertGameInDatabase(ctx context.Context, gam
 		gameRowId, err = insertNewGameRow(tx, gameNumber, apiKey, scanning)
 	}
 	if err != nil {
+		slog.Error("could not upsert games row", "isUpdate", gameExists, "err", err)
 		return 0, err
 	}
 
 	// Insert the new snapshots row
 	stmt = `insert into snapshots (game_id, path, created_at) values (?, ?, ?);`
 	if _, err = tx.Exec(stmt, gameRowId, snapshotFileName, time.Now().UnixMilli()); err != nil {
+		slog.Error("could not insert snapshot row", "err", err)
 		return 0, err
 	}
 
