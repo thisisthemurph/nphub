@@ -172,6 +172,6 @@ func insertNewGameRow(
 
 // updateExistingGameRowApiKey updates the apiKey for the game.
 func updateExistingGameRowApiKey(tx *sql.Tx, gameRowId int64, newApiKey string) error {
-	_, err := tx.Exec(`update games set api_key = ? id = ?;`, newApiKey, gameRowId)
+	_, err := tx.Exec(`update games set api_key = ? where id = ?;`, newApiKey, gameRowId)
 	return err
 }
