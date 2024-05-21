@@ -6,29 +6,31 @@ import (
 	"nphud/internal/app/feature/manage_game/model"
 	"nphud/pkg/util"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type GetGameByRowIDQuery struct {
-	RowID int `validate:"required,gte=1"`
+type GetGameByExternalIdQuery struct {
+	ExternalId uuid.UUID
 }
 
-func NewGetGameByRowIDQuery(rowID int) *GetGameByRowIDQuery {
-	return &GetGameByRowIDQuery{
-		RowID: rowID,
+func NewGetGameByExternalIDQuery(externalId uuid.UUID) *GetGameByExternalIdQuery {
+	return &GetGameByExternalIdQuery{
+		ExternalId: externalId,
 	}
 }
 
-type GetGameByRowIDQueryHandler struct {
+type GetGameByExternalIDQueryHandler struct {
 	db *sql.DB
 }
 
-func NewGetGameByRowIDQueryHandler(db *sql.DB) *GetGameByRowIDQueryHandler {
-	return &GetGameByRowIDQueryHandler{
+func NewGetGameByRowIDQueryHandler(db *sql.DB) *GetGameByExternalIDQueryHandler {
+	return &GetGameByExternalIDQueryHandler{
 		db: db,
 	}
 }
 
-func (h *GetGameByRowIDQueryHandler) Handle(ctx context.Context, cmd *GetGameByRowIDQuery) (model.Game, error) {
+func (h *GetGameByExternalIDQueryHandler) Handle(ctx context.Context, cmd *GetGameByExternalIdQuery) (model.Game, error) {
 	var game model.Game
 	stmt := `
 	select
@@ -42,7 +44,7 @@ func (h *GetGameByRowIDQueryHandler) Handle(ctx context.Context, cmd *GetGameByR
 		started,
 		paused,
 		game_over
-	from games where id = ?;`
+	from games where external_id = ?;`
 
 	var (
 		started         int
@@ -51,7 +53,7 @@ func (h *GetGameByRowIDQueryHandler) Handle(ctx context.Context, cmd *GetGameByR
 		startTimeMillis int64
 	)
 
-	err := h.db.QueryRowContext(ctx, stmt, cmd.RowID).Scan(
+	err := h.db.QueryRowContext(ctx, stmt, cmd.ExternalId).Scan(
 		&game.Name,
 		&game.Number,
 		&game.PlayerUID,

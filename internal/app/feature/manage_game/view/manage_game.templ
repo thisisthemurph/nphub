@@ -2,13 +2,13 @@ package view
 
 import (
 	"fmt"
+	"nphud/internal/app/feature/manage_game/model"
 	"nphud/internal/app/shared/ui"
 	npmodel "nphud/pkg/np/model"
 )
 
 type ManageGameViewBag struct {
-	GameName           string
-	GameNumber         string
+	Game               model.Game
 	LatestScanningData npmodel.ScanningData
 }
 
@@ -22,12 +22,12 @@ templ ManageGamePage(bag ManageGameViewBag) {
 		@ui.Container() {
 			<section>
 				<h2>
-					<a href={ GetGameURL(bag.GameNumber) } target="_blank">
-						{ bag.GameName }
+					<a href={ GetGameURL(bag.Game.Number) } target="_blank">
+						{ bag.Game.Name }
 					</a>
 					<span>({ bag.LatestScanningData.GameState() })</span>
 				</h2>
-				<p>Number: { bag.GameNumber }</p>
+				<p>Number: { bag.Game.Number }</p>
 				<p>Tick rate: { tickRateString(bag.LatestScanningData.TickRate) }</p>
 				<p>Production rate: Every { fmt.Sprint(bag.LatestScanningData.ProductionRate) } hours</p>
 				<p>Productions: { fmt.Sprint(bag.LatestScanningData.Productions) }</p>
@@ -35,7 +35,7 @@ templ ManageGamePage(bag ManageGameViewBag) {
 			</section>
 			@gameRules(bag.LatestScanningData)
 			<section class="w-full flex gap-8">
-				@Leaderboard(bag.LatestScanningData.Players)
+				@Leaderboard(bag.Game.ExternalId, bag.LatestScanningData.Players)
 				<section id="player-data">
 					<p>Select a player to see their data...</p>
 				</section>
