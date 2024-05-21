@@ -59,7 +59,7 @@ func (c *CreateGameCommandHandler) Handle(ctx context.Context, cmd *CreateGameCo
 		return CreateGameResult{}, err
 	}
 
-	gameRowId, err := c.upsertGameInDatabase(ctx, cmd.Number, cmd.APIKey, snapshotFileName, snapshot.ScanningData)
+	gameRowId, err := c.upsertGameInDatabase(ctx, cmd, snapshotFileName, snapshot.ScanningData)
 	if err != nil {
 		return CreateGameResult{}, err
 	}
