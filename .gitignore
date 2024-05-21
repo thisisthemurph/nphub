@@ -15,6 +15,7 @@ node_modules
 *.dll
 *.so
 *.dylib
+__debug_*
 
 # Test binary, built with `go test -c`
 *.test
