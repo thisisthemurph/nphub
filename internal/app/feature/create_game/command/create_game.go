@@ -14,8 +14,8 @@ import (
 )
 
 type CreateGameCommand struct {
-	Number string `validate:"required"`
-	APIKey string `validate:"required"`
+	Number string
+	APIKey string
 }
 
 func NewCreateGameCommand(number string, apiKey string) *CreateGameCommand {
@@ -43,8 +43,6 @@ func NewCreateGameCommandHandler(db *sql.DB, snapshotFileService service.Snapsho
 }
 
 func (c *CreateGameCommandHandler) Handle(ctx context.Context, cmd *CreateGameCommand) (CreateGameResult, error) {
-	// TODO: Validate the command using validator
-
 	game := np.New(cmd.Number, cmd.APIKey)
 	snapshotBytes, err := game.TakeSnapshot()
 	if err != nil {
