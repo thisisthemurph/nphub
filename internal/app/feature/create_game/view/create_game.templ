@@ -9,9 +9,9 @@ templ CreateGamePage() {
 	@ui.App() {
 		@ui.Container() {
 			<section class="flex flex-col gap-4 justify-center items-center">
-				<div class="prose border border-white p-4 rounded-lg shadow-xl max-w-96">
-					<h2>Add a new game</h2>
-					<p class="">Add one of your current games here using the game number and API key.</p>
+				<div class="prose border border-white p-6 rounded-lg shadow-xl max-w-96">
+					<h2>Track a game</h2>
+					<p>Start tracking a new game or continue with an already tracked game using the game number and API key.</p>
 					@CreateGameForm(NewCreateGameFormProps("", ""))
 				</div>
 			</section>
@@ -76,6 +76,11 @@ templ CreateGameForm(props *CreateGameFormProps) {
 			/>
 			@ui.FormError("key", props.Errors)
 		</label>
-		<button type="submit" class="mt-4 btn btn-primary">Create</button>
+		<button type="submit" class="mt-4 btn btn-primary">
+			<span>Continue</span>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"></path>
+			</svg>
+		</button>
 	</form>
 }
